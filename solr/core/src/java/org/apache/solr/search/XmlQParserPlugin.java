@@ -62,7 +62,7 @@ public class XmlQParserPlugin extends QParserPlugin {
   }
 
   @Override
-  public void init(NamedList args) {
+  public void init(@SuppressWarnings("rawtypes") NamedList args) {
   }
 
   public QParser createParser(String qstr, SolrParams localParams,
