@@ -1,4 +1,4 @@
-package org.apache.lucene.queryparser.xml.builders;
+package com.bloomberg.news.lucene.queryparser.xml.builders;
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,13 +16,9 @@ package org.apache.lucene.queryparser.xml.builders;
  * limitations under the License.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.lucene.queryparser.xml.DOMUtils;
 import org.apache.lucene.queryparser.xml.ParserException;
 import org.apache.lucene.queryparser.xml.QueryBuilder;
-import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
@@ -33,12 +29,11 @@ import org.w3c.dom.NodeList;
 /**
  * Builder for {@link DisjunctionMaxQuery}
  */
-@Deprecated // in favour of com.bloomberg.news.lucene.queryparser.xml.builders.DisjunctionMaxQueryBuilder
-public class BBDisjunctionMaxQueryBuilder implements QueryBuilder {
+public class DisjunctionMaxQueryBuilder implements QueryBuilder {
 
   private final QueryBuilder factory;
 
-  public BBDisjunctionMaxQueryBuilder(QueryBuilder factory) {
+  public DisjunctionMaxQueryBuilder(QueryBuilder factory) {
     this.factory = factory;
   }
 
@@ -49,10 +44,11 @@ public class BBDisjunctionMaxQueryBuilder implements QueryBuilder {
   @Override
   public Query getQuery(Element e) throws ParserException {
     float tieBreaker = DOMUtils.getAttribute(e, "tieBreaker", 0.0f); 
+    DisjunctionMaxQuery dq = new DisjunctionMaxQuery(tieBreaker);
+    dq.setBoost(DOMUtils.getAttribute(e, "boost", 1.0f));
 
     boolean matchAllDocsExists = false;
     boolean anyOtherQueryExists = false;
-    List<Query> disjuncts = new ArrayList<>();
     NodeList nl = e.getChildNodes();
     final int nlLen = nl.getLength();
     for (int i = 0; i < nlLen; i++) {
@@ -67,20 +63,14 @@ public class BBDisjunctionMaxQueryBuilder implements QueryBuilder {
         else {
           anyOtherQueryExists = true;
         }
-        disjuncts.add(q);
+        dq.add(q);
       }
     }
     //MatchallDocs query needs to be added only if there is no other queries inside the DisjunctionMaxQuery.
     //At least we preserve the users intention to execute the rest of the query. instead of flooding him with all the documents.
     if (matchAllDocsExists && !anyOtherQueryExists) 
       return new MatchAllDocsQuery();
-    else {
-        Query q = new DisjunctionMaxQuery(disjuncts, tieBreaker);
-        float boost = DOMUtils.getAttribute(e, "boost", 1.0f);
-        if (boost != 1f) {
-          q = new BoostQuery(q, boost);
-        }
-        return q;
-    }
+    else
+      return dq;
   }
 }
