@@ -1,3 +1,5 @@
+package com.bloomberg.news.lucene.analysis.ja;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,8 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.lucene.analysis.ja;
-
 
 import java.util.Map;
 
@@ -24,7 +24,7 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
 
 /**
  * Factory for {@link JapaneseNumberFilter}.
- * <br>
+ * <p>
  * <pre class="prettyprint">
  * &lt;fieldType name="text_ja" class="solr.TextField"&gt;
  *   &lt;analyzer&gt;
@@ -37,7 +37,6 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
  * It is important that punctuation is not discarded by the tokenizer so use
  * {@code discardPunctuation="false"} in your {@link JapaneseTokenizerFactory}.
  */
-@Deprecated // in favour of com.bloomberg.news.*.JapaneseNumberFilterFactory
 public class JapaneseNumberFilterFactory extends TokenFilterFactory {
 
   public JapaneseNumberFilterFactory(Map<String, String> args) {
