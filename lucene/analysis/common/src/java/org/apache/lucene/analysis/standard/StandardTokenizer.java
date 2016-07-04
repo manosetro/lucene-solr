@@ -36,9 +36,9 @@ import org.apache.lucene.util.AttributeFactory;
  * directory to your project and maintaining your own grammar-based tokenizer.
  */
 
-public final class StandardTokenizer extends Tokenizer {
-  /** A private instance of the JFlex-constructed scanner */
-  private StandardTokenizerImpl scanner;
+public class StandardTokenizer extends Tokenizer {
+  /** A protected instance of the JFlex-constructed scanner */
+  protected StandardTokenizerImpl scanner;
 
   // TODO: how can we remove these old types?!
   public static final int ALPHANUM          = 0;
@@ -135,7 +135,7 @@ public final class StandardTokenizer extends Tokenizer {
     init();
   }
 
-  private void init() {
+  protected void init() {
     this.scanner = new StandardTokenizerImpl(input);
   }
 
