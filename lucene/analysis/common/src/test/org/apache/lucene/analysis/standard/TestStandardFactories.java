@@ -57,6 +57,7 @@ public class TestStandardFactories extends BaseTokenStreamFactoryTestCase {
   /**
    * Test BBFinancialStandardTokenizerFactory
    */
+  @Deprecated // in favour of TestFinancialStandardTokenizer
   public void testBBFinancialStandardTokenizer() throws Exception {
     Reader reader = new StringReader("What's this thing do?");
     Tokenizer stream = tokenizerFactory("BBFinancialStandard").create(newAttributeFactory());
@@ -65,6 +66,7 @@ public class TestStandardFactories extends BaseTokenStreamFactoryTestCase {
         new String[] { "What's", "this", "thing", "do" });
   }
 
+  @Deprecated // in favour of TestFinancialStandardTokenizer
   public void testBBFinancialStandardTokenizerCurrencySymbols() throws Exception {
     Reader reader = new StringReader("\u00A310 $10 \u20AC10 \u00A510");
     Tokenizer stream = tokenizerFactory("BBFinancialStandard").create(newAttributeFactory());

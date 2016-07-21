@@ -1,4 +1,4 @@
-package org.apache.lucene.analysis.standard;
+package com.bloomberg.news.lucene.analysis.standard;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -17,33 +17,21 @@ package org.apache.lucene.analysis.standard;
  * limitations under the License.
  */
 
-import org.apache.lucene.analysis.util.TokenizerFactory;
+import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
 import org.apache.lucene.util.AttributeFactory;
 
-import java.io.Reader;
 import java.util.Map;
 
-/**
- * Custom factory for {@link BBFinancialStandardTokenizer}. 
- * Copied and modified from StandardTokenizerFactory
- */
-@Deprecated // in favour of com.bloomberg.news.*.FinancialStandardTokenizerFactory
-public class BBFinancialStandardTokenizerFactory extends TokenizerFactory {
-  
-  private final int maxTokenLength;
-  
-  /** Creates a new StandardTokenizerFactory */
-  public BBFinancialStandardTokenizerFactory(Map<String,String> args) {
+public class FinancialStandardTokenizerFactory extends StandardTokenizerFactory {
+
+  /** Creates a new FinancialStandardTokenizerFactory */
+  public FinancialStandardTokenizerFactory(Map<String,String> args) {
     super(args);
-    maxTokenLength = getInt(args, "maxTokenLength", StandardAnalyzer.DEFAULT_MAX_TOKEN_LENGTH);
-    if (!args.isEmpty()) {
-      throw new IllegalArgumentException("Unknown parameters: " + args);
-    }
   }
 
   @Override
-  public BBFinancialStandardTokenizer create(AttributeFactory factory) {
-    BBFinancialStandardTokenizer tokenizer = new BBFinancialStandardTokenizer(factory);
+  public FinancialStandardTokenizer create(AttributeFactory factory) {
+    FinancialStandardTokenizer tokenizer = new FinancialStandardTokenizer(factory);
     tokenizer.setMaxTokenLength(maxTokenLength);
     return tokenizer;
   }

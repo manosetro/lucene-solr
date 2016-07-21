@@ -26,6 +26,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
  */
 @SuppressWarnings("fallthrough")
 
+@Deprecated // in favour of com.bloomberg.news.*.FinancialStandardTokenizerImpl
 public final class BBFinancialStandardTokenizerImpl {
 
   /** This character denotes the end of file */

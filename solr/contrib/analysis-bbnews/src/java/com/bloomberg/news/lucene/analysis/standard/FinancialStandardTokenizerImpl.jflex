@@ -1,4 +1,4 @@
-package org.apache.lucene.analysis.standard;
+package com.bloomberg.news.lucene.analysis.standard;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -17,33 +17,36 @@ package org.apache.lucene.analysis.standard;
  * limitations under the License.
  */
 
+import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 /**
  * Custom implementation copied and modified from StandardTokenizerImpl.
- * @Deprecated // in favour of com.bloomberg.news.*.FinancialStandardTokenizerImpl
  */
-@SuppressWarnings("fallthrough")
 %%
 
 %unicode 6.3
 %integer
 %final
 %public
-%class BBFinancialStandardTokenizerImpl
-%implements StandardTokenizerInterface
+%class FinancialStandardTokenizerImpl
 %function getNextToken
 %char
-%buffer 255
+%buffer 4096
 
 // 00A3 = pound, 00A5 = yen
-ALetter           = (\p{WB:ALetter} | \p{Block:Currency_Symbols} | [&@#$\u00A3\u00A5])
-HebrewOrALetter   = (\p{WB:HebrewLetter} | {ALetter})
+//ALetter           = (\p{WB:ALetter} | \p{Block:Currency_Symbols} | [&@#$\u00A3\u00A5] | {ALetterSupp})
+//Format            = (\p{WB:Format}                                                    | {FormatSupp})
+//HebrewOrALetter   = ({HebrewLetter} | {ALetter})
 
 // UAX#29 WB4. X (Extend | Format)* --> X
 //
+//HangulEx            = [\p{Script:Hangul}&&[\p{WB:ALetter}\p{WB:Hebrew_Letter}]] ({Format} | {Extend})*
+//HebrewOrALetterEx   = {HebrewOrALetter}                                         ({Format} | {Extend})*
+
+// 00A3 = pound, 00A5 = yen
 HangulEx            = [\p{Script:Hangul}&&[\p{WB:ALetter}\p{WB:Hebrew_Letter}]] [\p{WB:Format}\p{WB:Extend}]*
-HebrewOrALetterEx   = {HebrewOrALetter}                                         [\p{WB:Format}\p{WB:Extend}]*
+HebrewOrALetterEx   = [\p{WB:HebrewLetter}\p{WB:ALetter}]                       [\p{WB:Format}\p{WB:Extend}]*
 NumericEx           = [\p{WB:Numeric}[\p{Blk:HalfAndFullForms}&&\p{Nd}]]        [\p{WB:Format}\p{WB:Extend}]*
 KatakanaEx          = \p{WB:Katakana}                                           [\p{WB:Format}\p{WB:Extend}]* 
 MidLetterEx         = [\p{WB:MidLetter}\p{WB:MidNumLet}\p{WB:SingleQuote}]      [\p{WB:Format}\p{WB:Extend}]* 
@@ -56,6 +59,7 @@ DoubleQuoteEx       = \p{WB:Double_Quote}                                       
 HebrewLetterEx      = \p{WB:Hebrew_Letter}                                      [\p{WB:Format}\p{WB:Extend}]*
 RegionalIndicatorEx = \p{WB:RegionalIndicator}                                  [\p{WB:Format}\p{WB:Extend}]*
 ComplexContextEx    = \p{LB:Complex_Context}                                    [\p{WB:Format}\p{WB:Extend}]*
+
 
 %{
   /** Alphanumeric sequences */
@@ -93,7 +97,7 @@ ComplexContextEx    = \p{LB:Complex_Context}                                    
   public final void getText(CharTermAttribute t) {
     t.copyBuffer(zzBuffer, zzStartRead, zzMarkedPos-zzStartRead);
   }
-  
+
   /**
    * Sets the scanner buffer size in chars
    */

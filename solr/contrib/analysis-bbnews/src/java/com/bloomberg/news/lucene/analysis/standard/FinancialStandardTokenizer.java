@@ -15,48 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.lucene.analysis.standard;
+package com.bloomberg.news.lucene.analysis.standard;
 
 import java.io.IOException;
 
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeFactory;
 
-/** Custom tokenizer copied from StandardTokenizer and modified
- * to use a BBFinancialStandardTokenizerImpl scanner. 
- * 
- */
-@Deprecated // in favour of com.bloomberg.news.*.FinancialStandardTokenizer
-public final class BBFinancialStandardTokenizer extends Tokenizer {
-  /** A private instance of the JFlex-constructed scanner */
-  private BBFinancialStandardTokenizerImpl scanner;
+public final class FinancialStandardTokenizer extends Tokenizer {
+
+  /** A protected instance of the JFlex-constructed scanner */
+  protected FinancialStandardTokenizerImpl scanner;
 
   public static final int ALPHANUM          = 0;
-  /** @deprecated (3.1) */
-  @Deprecated
-  public static final int APOSTROPHE        = 1;
-  /** @deprecated (3.1) */
-  @Deprecated
-  public static final int ACRONYM           = 2;
-  /** @deprecated (3.1) */
-  @Deprecated
-  public static final int COMPANY           = 3;
   public static final int EMAIL             = 4;
-  /** @deprecated (3.1) */
-  @Deprecated
-  public static final int HOST              = 5;
   public static final int NUM               = 6;
-  /** @deprecated (3.1) */
-  @Deprecated
-  public static final int CJ                = 7;
-
-  /** @deprecated (3.1) */
-  @Deprecated
-  public static final int ACRONYM_DEP       = 8;
 
   public static final int SOUTHEAST_ASIAN = 9;
   public static final int IDEOGRAPHIC = 10;
@@ -82,17 +60,28 @@ public final class BBFinancialStandardTokenizer extends Tokenizer {
     "<HANGUL>"
   };
   
+  public static final int MAX_TOKEN_LENGTH_LIMIT = 1024 * 1024;
+  
   private int skippedPositions;
 
   private int maxTokenLength = StandardAnalyzer.DEFAULT_MAX_TOKEN_LENGTH;
 
-  /** Set the max allowed token length.  Any token longer
-   *  than this is skipped. */
+  /**
+   * Set the max allowed token length.  No tokens longer than this are emitted.
+   * 
+   * @throws IllegalArgumentException if the given length is outside of the
+   *  range [1, {@value #MAX_TOKEN_LENGTH_LIMIT}].
+   */ 
   public void setMaxTokenLength(int length) {
     if (length < 1) {
       throw new IllegalArgumentException("maxTokenLength must be greater than zero");
+    } else if (length > MAX_TOKEN_LENGTH_LIMIT) {
+      throw new IllegalArgumentException("maxTokenLength may not exceed " + MAX_TOKEN_LENGTH_LIMIT);
     }
-    this.maxTokenLength = length;
+    if (length != maxTokenLength) {
+      maxTokenLength = length;
+      scanner.setBufferSize(length);
+    }
   }
 
   /** @see #setMaxTokenLength */
@@ -101,25 +90,25 @@ public final class BBFinancialStandardTokenizer extends Tokenizer {
   }
 
   /**
-   * Creates a new instance of the {@link org.apache.lucene.analysis.standard.StandardTokenizer}.  Attaches
+   * Creates a new instance of the {@link com.bloomberg.news.lucene.analysis.standard.FinancialStandardTokenizer}.  Attaches
    * the <code>input</code> to the newly created JFlex scanner.
-
+   *
    * See http://issues.apache.org/jira/browse/LUCENE-1068
    */
-  public BBFinancialStandardTokenizer() {
+  public FinancialStandardTokenizer() {
     init();
   }
 
   /**
-   * Creates a new StandardTokenizer with a given {@link org.apache.lucene.util.AttributeFactory} 
+   * Creates a new FinancialStandardTokenizer with a given {@link org.apache.lucene.util.AttributeFactory}
    */
-  public BBFinancialStandardTokenizer(AttributeFactory factory) {
+  public FinancialStandardTokenizer(AttributeFactory factory) {
     super(factory);
     init();
   }
 
-  private final void init() {
-    this.scanner = new BBFinancialStandardTokenizerImpl(input);
+  private void init() {
+    this.scanner = new FinancialStandardTokenizerImpl(input);
   }
 
   // this tokenizer generates three attributes:
@@ -142,7 +131,7 @@ public final class BBFinancialStandardTokenizer extends Tokenizer {
     while(true) {
       int tokenType = scanner.getNextToken();
 
-      if (tokenType == BBFinancialStandardTokenizerImpl.YYEOF) {
+      if (tokenType == FinancialStandardTokenizerImpl.YYEOF) {
         return false;
       }
 
@@ -151,15 +140,7 @@ public final class BBFinancialStandardTokenizer extends Tokenizer {
         scanner.getText(termAtt);
         final int start = scanner.yychar();
         offsetAtt.setOffset(correctOffset(start), correctOffset(start+termAtt.length()));
-        // This 'if' should be removed in the next release. For now, it converts
-        // invalid acronyms to HOST. When removed, only the 'else' part should
-        // remain.
-        if (tokenType == StandardTokenizer.ACRONYM_DEP) {
-          typeAtt.setType(StandardTokenizer.TOKEN_TYPES[StandardTokenizer.HOST]);
-          termAtt.setLength(termAtt.length() - 1); // remove extra '.'
-        } else {
-          typeAtt.setType(StandardTokenizer.TOKEN_TYPES[tokenType]);
-        }
+        typeAtt.setType(FinancialStandardTokenizer.TOKEN_TYPES[tokenType]);
         return true;
       } else
         // When we skip a too-long term, we still increment the
