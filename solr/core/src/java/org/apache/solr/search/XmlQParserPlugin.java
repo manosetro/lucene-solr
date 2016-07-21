@@ -1,17 +1,3 @@
-package org.apache.solr.search;
-
-import org.apache.lucene.queryparser.xml.CoreParser;
-import org.apache.lucene.queryparser.xml.ParserException;
-import org.apache.lucene.search.Query;
-import org.apache.solr.common.params.CommonParams;
-import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.common.util.NamedList;
-import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.schema.IndexSchema;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,10 +14,32 @@ import java.nio.charset.StandardCharsets;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.solr.search;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.queryparser.xml.ParserException;
+import org.apache.lucene.search.Query;
+
+import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.NamedList;
+import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.IndexSchema;
 
 
 public class XmlQParserPlugin extends QParserPlugin {
   public static final String NAME = "xmlparser";
+
+  private NamedList args;
+
+  @Override
+  public void init(@SuppressWarnings("rawtypes") NamedList args) {
+    super.init(args);
+    this.args = args;
+  }
 
   private class XmlQParser extends QParser {
 
@@ -46,11 +54,10 @@ public class XmlQParserPlugin extends QParserPlugin {
         return null;
       }
       final IndexSchema schema = req.getSchema();
-      CoreParser solrParser = new BBSolrCoreParser(
-          QueryParsing.getDefaultField(schema, getParam(CommonParams.DF)),
-          schema.getQueryAnalyzer(),
-          req);
+      final String defaultField = QueryParsing.getDefaultField(schema, getParam(CommonParams.DF));
+      final Analyzer analyzer = schema.getQueryAnalyzer();
 
+      final BBSolrCoreParser solrParser = new BBSolrCoreParser(defaultField, analyzer, req);
       try {
         return solrParser.parse(new ByteArrayInputStream(qstr.getBytes(StandardCharsets.UTF_8)));
       } catch (ParserException e) {
@@ -58,10 +65,6 @@ public class XmlQParserPlugin extends QParserPlugin {
       }
     }
 
-  }
-
-  @Override
-  public void init(@SuppressWarnings("rawtypes") NamedList args) {
   }
 
   public QParser createParser(String qstr, SolrParams localParams,
