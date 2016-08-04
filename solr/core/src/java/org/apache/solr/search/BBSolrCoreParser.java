@@ -20,8 +20,8 @@ import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.xml.BBCoreParser;
+import org.apache.lucene.queryparser.xml.FilterBuilder;
 import org.apache.lucene.queryparser.xml.QueryBuilder;
-
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.request.SolrQueryRequest;
@@ -71,6 +71,21 @@ public class BBSolrCoreParser extends BBCoreParser implements NamedListInitializ
     for (final Map.Entry<String,Object> entry : args) {
       final String queryName = entry.getKey();
       final String queryBuilderClassName = (String)entry.getValue();
+
+      // temporary 'hack' that will go away when the ...Filter classes go away
+      if (queryBuilderClassName.contains("Filter")) {
+        final String filterName = queryName;
+        final String filterBuilderClassName = queryBuilderClassName;
+        final SolrFilterBuilder filterBuilder = loader.newInstance(
+            filterBuilderClassName,
+            SolrFilterBuilder.class,
+            null,
+            new Class[] {String.class, Analyzer.class, SolrQueryRequest.class},
+            new Object[] {defaultField, analyzer, req});
+
+        this.filterFactory.addBuilder(filterName, filterBuilder);
+        continue;
+      }
 
       final SolrQueryBuilder queryBuilder = loader.newInstance(
           queryBuilderClassName,
