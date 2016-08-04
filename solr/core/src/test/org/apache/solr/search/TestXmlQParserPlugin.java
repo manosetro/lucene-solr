@@ -58,6 +58,12 @@ public class TestXmlQParserPlugin extends SolrTestCaseJ4 {
     implTestQuery(numDocs, q, numDocs);
   }
 
+  @Test
+  public void testGreetingsFilter() throws Exception {
+    final int numDocs = random().nextInt(10);
+    implTestQuery(numDocs, "<ConstantScoreQuery><GreetingsFilter/></ConstantScoreQuery>", numDocs);
+  }
+
   public void implTestQuery(int numDocs, String q, int expectedCount) throws Exception {
     // add some documents
     for (int ii=1; ii<=numDocs; ++ii) {

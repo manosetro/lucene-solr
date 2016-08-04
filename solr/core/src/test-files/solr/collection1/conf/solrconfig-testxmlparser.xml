@@ -29,5 +29,6 @@
     <str name="HandyQuery">org.apache.solr.search.HandyQueryBuilder</str>
     <str name="HelloQuery">org.apache.solr.search.HelloQueryBuilder</str>
     <str name="GoodbyeQuery">org.apache.solr.search.GoodbyeQueryBuilder</str>
+    <str name="GreetingsFilter">org.apache.solr.search.GreetingsFilterBuilder</str>
   </queryParser>
 </config>
