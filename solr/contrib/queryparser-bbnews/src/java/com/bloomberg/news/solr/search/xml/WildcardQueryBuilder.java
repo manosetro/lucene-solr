@@ -1,15 +1,17 @@
-package org.apache.solr.search.xml;
+package com.bloomberg.news.solr.search.xml;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.xml.DOMUtils;
 import org.apache.lucene.queryparser.xml.ParserException;
 import org.apache.lucene.queryparser.xml.QueryBuilder;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
+import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.FieldType;
-import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
+import org.apache.solr.search.SolrQueryBuilder;
 import org.w3c.dom.Element;
 
 /*
@@ -29,13 +31,12 @@ import org.w3c.dom.Element;
  * limitations under the License.
  */
 
-@Deprecated // in favour of com.bloomberg.news.*.WildcardQueryBuilder
-public class WildcardQueryBuilder implements QueryBuilder
+public class WildcardQueryBuilder extends SolrQueryBuilder
 {
-    protected IndexSchema schema;
 
-    public WildcardQueryBuilder(IndexSchema schema) {
-        this.schema = schema;
+    public WildcardQueryBuilder(String defaultField, Analyzer analyzer,
+        SolrQueryRequest req, QueryBuilder queryFactory) {
+        super(defaultField, analyzer, req, queryFactory);
     }
 
     public Query getQuery(Element e) throws ParserException
@@ -43,7 +44,7 @@ public class WildcardQueryBuilder implements QueryBuilder
         String field = DOMUtils.getAttributeWithInheritanceOrFail(e, "fieldName");
         String value = DOMUtils.getNonBlankTextOrFail(e);
 
-        SchemaField sf = schema.getFieldOrNull((field));
+        SchemaField sf = req.getSchema().getFieldOrNull((field));
         FieldType ft = sf.getType();
 
         if (ft == null || !(ft instanceof TextField))
