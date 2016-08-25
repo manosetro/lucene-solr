@@ -1,8 +1,9 @@
-package org.apache.solr.search.xml;
+package com.bloomberg.news.solr.search.xml;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queries.function.BoostedQuery;
 import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.lucene.queries.function.ValueSource;
@@ -14,6 +15,7 @@ import org.apache.lucene.queryparser.xml.QueryBuilder;
 import org.apache.lucene.search.Query;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.FunctionQParser;
+import org.apache.solr.search.SolrQueryBuilder;
 import org.apache.solr.search.SyntaxError;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -41,16 +43,11 @@ import org.w3c.dom.Node;
 //<Boosts><Boost>...</Boost><Boost>...</Boost></Boosts>
 //</BoostedQuery>
 //The score is multiplied by all the Boosts specified.
-@Deprecated // in favour of com.bloomberg.news.*.BoostedQueryBuilder
-public class BoostedQueryBuilder implements QueryBuilder {
+public class BoostedQueryBuilder extends SolrQueryBuilder {
 
-  private final QueryBuilder     factory;
-  private final SolrQueryRequest solrQueryReq;
-
-  public BoostedQueryBuilder(QueryBuilder factory,
-      SolrQueryRequest req) {
-    this.factory = factory;
-    this.solrQueryReq = req;
+  public BoostedQueryBuilder(String defaultField, Analyzer analyzer,
+      SolrQueryRequest req, QueryBuilder queryFactory) {
+      super(defaultField, analyzer, req, queryFactory);
   }
 
   @Override
@@ -59,7 +56,7 @@ public class BoostedQueryBuilder implements QueryBuilder {
     try {
       Element mainQueryElem = DOMUtils.getChildByTagOrFail(e, "Query");
       mainQueryElem = DOMUtils.getFirstChildOrFail(mainQueryElem);
-      Query mainQuery = factory.getQuery(mainQueryElem);
+      Query mainQuery = queryFactory.getQuery(mainQueryElem);
       Query topQuery = mainQuery;
 
       Element boostsElem = DOMUtils.getChildByTagOrFail(e, "Boosts");
@@ -76,7 +73,7 @@ public class BoostedQueryBuilder implements QueryBuilder {
             continue;
 
           Query boost = new FunctionQParser(boostStr, null, null,
-              solrQueryReq).getQuery();
+              req).getQuery();
           ValueSource vs;
           if (boost instanceof FunctionQuery) {
             vs = ((FunctionQuery) boost).getValueSource();
