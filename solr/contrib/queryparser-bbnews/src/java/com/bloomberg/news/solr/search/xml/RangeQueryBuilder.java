@@ -1,11 +1,13 @@
-package org.apache.solr.search.xml;
+package com.bloomberg.news.solr.search.xml;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.xml.DOMUtils;
 import org.apache.lucene.queryparser.xml.ParserException;
 import org.apache.lucene.queryparser.xml.QueryBuilder;
 import org.apache.lucene.search.Query;
-import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.SchemaField;
+import org.apache.solr.search.SolrQueryBuilder;
 
 import org.w3c.dom.Element;
 
@@ -26,13 +28,11 @@ import org.w3c.dom.Element;
  * limitations under the License.
  */
 
-@Deprecated // in favour of com.bloomberg.news.*.RangeQueryBuilder
-public class RangeQueryBuilder implements QueryBuilder {
+public class RangeQueryBuilder extends SolrQueryBuilder {
 
-    protected final IndexSchema schema;
-
-    public RangeQueryBuilder(IndexSchema schema) {
-        this.schema = schema;
+    public RangeQueryBuilder(String defaultField, Analyzer analyzer,
+        SolrQueryRequest req, QueryBuilder queryFactory) {
+        super(defaultField, analyzer, req, queryFactory);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class RangeQueryBuilder implements QueryBuilder {
         String upperTerm = DOMUtils.getAttribute(e, "upperTerm",null);
         boolean lowerInclusive = DOMUtils.getAttribute(e, "includeLower", true);
         boolean upperInclusive = DOMUtils.getAttribute(e, "includeUpper", true);
-        SchemaField sf = schema.getField(field);
+        SchemaField sf = req.getSchema().getField(field);
 
         return sf.getType().getRangeQuery(null, sf, lowerTerm, upperTerm,
                 lowerInclusive, upperInclusive);

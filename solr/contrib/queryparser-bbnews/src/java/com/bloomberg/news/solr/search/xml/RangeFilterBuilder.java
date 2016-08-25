@@ -1,4 +1,4 @@
-package org.apache.solr.search.xml;
+package com.bloomberg.news.solr.search.xml;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.xml.DOMUtils;
@@ -8,8 +8,8 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.NumericRangeFilter;
 import org.apache.lucene.search.TermRangeFilter;
 import org.apache.lucene.util.BytesRef;
+import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.FieldType;
-import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.schema.TrieDateField;
@@ -18,6 +18,7 @@ import org.apache.solr.schema.TrieField;
 import org.apache.solr.schema.TrieFloatField;
 import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.schema.TrieLongField;
+import org.apache.solr.search.SolrFilterBuilder;
 
 import org.w3c.dom.Element;
 
@@ -42,14 +43,13 @@ import org.w3c.dom.Element;
 //No support for date types. THis filter aims to integrate all into one and need to find precisionStep type from schema.
 //Look at RangeQueryBuilder for more info
 
-@Deprecated // in favour of com.bloomberg.news.*.RangeFilterBuilder
-public class RangeFilterBuilder implements FilterBuilder {
+public class RangeFilterBuilder extends SolrFilterBuilder {
 
-    private final IndexSchema schema;
     static final TrieDateField dateField = new TrieDateField();
 
-    public RangeFilterBuilder(IndexSchema schema) {
-        this.schema = schema;
+    public RangeFilterBuilder(String defaultField, Analyzer analyzer,
+        SolrQueryRequest req) {
+        super(defaultField, analyzer, req);
     }
 
     @SuppressWarnings("deprecation")
@@ -61,7 +61,7 @@ public class RangeFilterBuilder implements FilterBuilder {
         String upperTerm = DOMUtils.getAttribute(e, "upperTerm", null);
         boolean lowerInclusive = DOMUtils.getAttribute(e, "includeLower", true);
         boolean upperInclusive = DOMUtils.getAttribute(e, "includeUpper", true);
-        SchemaField sf = schema.getField(field);
+        SchemaField sf = req.getSchema().getField(field);
         FieldType ft = sf.getType();
 
         Filter filter;
