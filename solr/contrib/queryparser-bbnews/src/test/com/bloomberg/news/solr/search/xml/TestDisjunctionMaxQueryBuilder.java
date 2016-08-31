@@ -1,4 +1,4 @@
-package com.bloomberg.news.lucene.queryparser.xml.builders;
+package com.bloomberg.news.solr.search.xml;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -45,7 +45,7 @@ public class TestDisjunctionMaxQueryBuilder extends LuceneTestCase {
     final QueryBuilderFactory queryFactory = new QueryBuilderFactory();
     queryFactory.addBuilder("TermQuery", new TermQueryBuilder());
     queryFactory.addBuilder("MatchAllDocsQuery", new MatchAllDocsQueryBuilder());
-    final DisjunctionMaxQueryBuilder dmqBuilder = new DisjunctionMaxQueryBuilder(queryFactory);
+    final DisjunctionMaxQueryBuilder dmqBuilder = new DisjunctionMaxQueryBuilder(null, null, null, queryFactory);
 
     final float tieBreakerMultiplier = random().nextFloat();
     final boolean madQueryOnly = random().nextBoolean();

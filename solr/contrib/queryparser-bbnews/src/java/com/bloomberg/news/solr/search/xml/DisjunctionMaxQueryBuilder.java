@@ -1,4 +1,4 @@
-package com.bloomberg.news.lucene.queryparser.xml.builders;
+package com.bloomberg.news.solr.search.xml;
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,12 +16,15 @@ package com.bloomberg.news.lucene.queryparser.xml.builders;
  * limitations under the License.
  */
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.xml.DOMUtils;
 import org.apache.lucene.queryparser.xml.ParserException;
 import org.apache.lucene.queryparser.xml.QueryBuilder;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
+import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.SolrQueryBuilder;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -29,12 +32,11 @@ import org.w3c.dom.NodeList;
 /**
  * Builder for {@link DisjunctionMaxQuery}
  */
-public class DisjunctionMaxQueryBuilder implements QueryBuilder {
+public class DisjunctionMaxQueryBuilder extends SolrQueryBuilder {
 
-  private final QueryBuilder factory;
-
-  public DisjunctionMaxQueryBuilder(QueryBuilder factory) {
-    this.factory = factory;
+  public DisjunctionMaxQueryBuilder(String defaultField, Analyzer analyzer,
+      SolrQueryRequest req, QueryBuilder queryFactory) {
+    super(defaultField, analyzer, req, queryFactory);
   }
 
   /* (non-Javadoc)
@@ -55,7 +57,7 @@ public class DisjunctionMaxQueryBuilder implements QueryBuilder {
       Node node = nl.item(i);
       if (node instanceof Element) { // all elements are disjuncts.
         Element queryElem = (Element) node;
-        Query q = factory.getQuery(queryElem);
+        Query q = queryFactory.getQuery(queryElem);
         if (q instanceof MatchAllDocsQuery) {
           matchAllDocsExists = true;
           continue;// we will add this MAD query later if necessary
