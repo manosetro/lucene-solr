@@ -14,36 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.solr.request;
+package org.apache.solr.response;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.search.ReturnFields;
-import org.apache.solr.response.JSONResponseWriter;
-import org.apache.solr.response.PHPSerializedResponseWriter;
-import org.apache.solr.response.PythonResponseWriter;
-import org.apache.solr.response.QueryResponseWriter;
-import org.apache.solr.response.RubyResponseWriter;
-import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.SolrReturnFields;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /** Test some aspects of JSON/python writer output (very incomplete)
- * @Deprecated use {@link org.apache.solr.response.JSONWriterTest} instead
  *
  */
-@Deprecated
 public class JSONWriterTest extends SolrTestCaseJ4 {
   @BeforeClass
   public static void beforeClass() throws Exception {
