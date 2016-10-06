@@ -37,6 +37,7 @@ import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.DateField;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.ReturnFields;
+import org.apache.solr.util.RTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -271,8 +272,13 @@ public abstract class TextResponseWriter {
     DocTransformer transformer = fields.getTransformer();
     context.searcher = req.getSearcher();
     context.iterator = ids.iterator();
+    final RTimer timer;
     if( transformer != null ) {
+      timer = req.getRequestTimer().sub("transformer");
       transformer.setContext( context );
+      timer.pause();
+    } else {
+      timer = null;
     }
     int sz = ids.size();
     Set<String> fnames = fields.getLuceneFieldNames();
@@ -280,13 +286,21 @@ public abstract class TextResponseWriter {
       int id = context.iterator.nextDoc();
       Document doc = context.searcher.doc(id, fnames);
       SolrDocument sdoc = toSolrDocument( doc );
-      if( transformer != null ) {
+			if( transformer != null ) {
+        timer.resume();
         transformer.transform( sdoc, id);
+        timer.pause();
       }
       writeSolrDocument( null, sdoc, returnFields, i );
     }
-    if( transformer != null ) {
+
+		if( transformer != null ) {
+      timer.stop();
       transformer.setContext( null );
+      log.debug("transformer={} total-time-in-millis={}",
+          transformer.getName(),
+          timer.getTime()
+      );
     }
     writeEndDocumentList();
   }
