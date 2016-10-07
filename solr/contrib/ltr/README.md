@@ -391,9 +391,15 @@ About half the time for ranking is spent in the creation of weights for each fea
 <config>
   <!-- Query parser used to rerank top docs with a provided model -->
   <queryParser name="ltr" class="org.apache.solr.search.LTRQParserPlugin">
-     <int name="threadModule.totalPoolThreads">10</int> <!-- Maximum threads to use for all queries -->
-     <int name="threadModule.numThreadsPerRequest">5</int> <!-- Maximum threads to use for a single query-->
+     <int name="threadModule.totalPoolThreads">10</int> <!-- Maximum threads to share for all requests -->
+     <int name="threadModule.numThreadsPerRequest">5</int> <!-- Maximum threads to use for a single requests-->
   </queryParser>
+  
+  <!-- Transformer for extracting features -->
+  <transformer name="features" class="org.apache.solr.response.transform.LTRFeatureLoggerTransformerFactory">
+     <int name="threadModule.totalPoolThreads">10</int> <!-- Maximum threads to share for all requests -->
+     <int name="threadModule.numThreadsPerRequest">5</int> <!-- Maximum threads to use for a single requests-->
+  </transformer>
 </config>
 
 ```
