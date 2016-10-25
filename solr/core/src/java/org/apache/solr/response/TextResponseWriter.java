@@ -259,53 +259,68 @@ public abstract class TextResponseWriter {
     }
     return out;
   }
-  
+
   public final void writeDocuments(String name, ResultContext res, ReturnFields fields ) throws IOException {
     DocList ids = res.docs;
     TransformContext context = new TransformContext();
     context.query = res.query;
     context.wantsScores = fields.wantsScore() && ids.hasScores();
     context.req = req;
-    writeStartDocumentList(name, ids.offset(), ids.size(), ids.matches(), 
+    writeStartDocumentList(name, ids.offset(), ids.size(), ids.matches(),
         context.wantsScores ? new Float(ids.maxScore()) : null );
-    
+
     DocTransformer transformer = fields.getTransformer();
     context.searcher = req.getSearcher();
     context.iterator = ids.iterator();
     final RTimer timer;
-    if( transformer != null ) {
-      timer = req.getRequestTimer().sub("transformer");
+    final boolean enableTransformerTimer = transformer != null && log.isDebugEnabled();
+    if (transformer != null) {
+      if (enableTransformerTimer) {
+        timer = req.getRequestTimer().sub("transformer");
+      } else {
+        timer = null;
+      }
       transformer.setContext( context );
-      timer.pause();
+      if (enableTransformerTimer){
+        timer.pause();
+      } 
     } else {
-      timer = null;
+        timer = null;
     }
+
     int sz = ids.size();
     Set<String> fnames = fields.getLuceneFieldNames();
     for (int i=0; i<sz; i++) {
       int id = context.iterator.nextDoc();
       Document doc = context.searcher.doc(id, fnames);
       SolrDocument sdoc = toSolrDocument( doc );
-			if( transformer != null ) {
-        timer.resume();
+      if (transformer != null) {
+        if (enableTransformerTimer) {
+          timer.resume();
+        }
         transformer.transform( sdoc, id);
-        timer.pause();
+        if (enableTransformerTimer) {
+          timer.pause();
+        }
       }
       writeSolrDocument( null, sdoc, returnFields, i );
     }
 
-		if( transformer != null ) {
-      timer.stop();
+    if(transformer != null) {
+      if (enableTransformerTimer){
+        timer.stop();
+      }
       transformer.setContext( null );
-      log.debug("transformer={} total-time-in-millis={}",
+      if (enableTransformerTimer){
+        log.debug("transformer={} total-time-in-millis={}",
           transformer.getName(),
           timer.getTime()
-      );
+        );
+      }
     }
     writeEndDocumentList();
   }
-  
-  
+
   public abstract void writeStr(String name, String val, boolean needsEscaping) throws IOException;
 
   public abstract void writeMap(String name, Map val, boolean excludeOuter, boolean isFirstVal) throws IOException;
