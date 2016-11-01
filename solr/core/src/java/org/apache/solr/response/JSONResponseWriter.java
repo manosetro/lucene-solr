@@ -34,8 +34,12 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.response.transform.DocTransformer;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.ReturnFields;
+import org.apache.solr.util.RTimer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -43,6 +47,8 @@ import org.apache.solr.search.ReturnFields;
 
 public class JSONResponseWriter implements QueryResponseWriter {
   static String CONTENT_TYPE_JSON_UTF8 = "application/json; charset=UTF-8";
+
+  private static final Logger log = LoggerFactory.getLogger(JSONResponseWriter.class);
 
   private String contentType = CONTENT_TYPE_JSON_UTF8;
 
@@ -73,6 +79,15 @@ public class JSONResponseWriter implements QueryResponseWriter {
       w.writeResponse();
     } finally {
       w.close();
+    }
+    // sub will create a new RTimer if it cannot find transfromer in the children,
+    // so we need to check if it exists already.
+    if ((log.isDebugEnabled()) && 
+        (req.getRequestTimer().getChildren().indexOf("transformer", 0) >= 0)){
+      final ReturnFields rf = rsp.getReturnFields();
+      final DocTransformer dt = rf.getTransformer();
+      final RTimer timer = req.getRequestTimer().sub("transformer");
+      log.debug("transformers: [{}] total-time-in-millis={}", dt.getName() , timer.getTime());
     }
   }
 

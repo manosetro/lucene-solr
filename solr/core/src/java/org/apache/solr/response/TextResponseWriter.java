@@ -272,22 +272,15 @@ public abstract class TextResponseWriter {
     DocTransformer transformer = fields.getTransformer();
     context.searcher = req.getSearcher();
     context.iterator = ids.iterator();
-    final RTimer timer;
-    final boolean enableTransformerTimer = transformer != null && log.isDebugEnabled();
-    if (transformer != null) {
-      if (enableTransformerTimer) {
-        timer = req.getRequestTimer().sub("transformer");
-      } else {
-        timer = null;
-      }
-      transformer.setContext( context );
-      if (enableTransformerTimer){
-        timer.pause();
-      } 
-    } else {
-        timer = null;
-    }
 
+    final boolean enableTransformerTimer = transformer != null;
+    final RTimer timer = (enableTransformerTimer) ? req.getRequestTimer().sub("transformer") : null;
+    if (transformer != null) {
+      transformer.setContext( context );
+    }
+    if (enableTransformerTimer){
+      timer.pause();
+    }
     int sz = ids.size();
     Set<String> fnames = fields.getLuceneFieldNames();
     for (int i=0; i<sz; i++) {
@@ -311,12 +304,6 @@ public abstract class TextResponseWriter {
         timer.stop();
       }
       transformer.setContext( null );
-      if (enableTransformerTimer){
-        log.debug("transformer={} total-time-in-millis={}",
-          transformer.getName(),
-          timer.getTime()
-        );
-      }
     }
     writeEndDocumentList();
   }
