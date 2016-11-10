@@ -23,15 +23,19 @@ import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.DisjunctionMaxQuery;
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.LuceneTestCase;
 import org.junit.AfterClass;
+import org.w3c.dom.Element;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class TestCoreParser extends LuceneTestCase {
 
@@ -205,6 +209,10 @@ public class TestCoreParser extends LuceneTestCase {
     return coreParser;
   }
 
+  protected Filter parseFilterXML(String text) throws ParserException {
+    return coreParser().filterFactory.getFilter(parseXML(text));
+  }
+
   private CoreParserTestIndexData indexData() {
     if (indexData == null) {
       try {
@@ -269,5 +277,13 @@ public class TestCoreParser extends LuceneTestCase {
       System.out.println();
     }
     assertTrue(qType + " produced no results", producedResults);
+  }
+
+  //================= Helper methods ===================================
+
+  private static Element parseXML(String text) throws ParserException {
+    InputStream xmlStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+    org.w3c.dom.Document doc = CoreParser.parseXML(xmlStream);
+    return doc.getDocumentElement();
   }
 }
