@@ -29,7 +29,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.w3c.dom.Element;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -95,13 +94,13 @@ public class TestBBCoreParserBoolean extends TestBBCoreParser {
         + "<Clause occurs='should'><TermFilter>janeiro</TermFilter></Clause>"
         + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
 
-    Filter f = coreParser().filterFactory.getFilter(parseXML(text));
+    Filter f = parseFilterXML(text);
     assertTrue("Expecting a TermFilter, but resulted in " + f.getClass(), f instanceof TermFilter);
 
     text = "<BooleanFilter fieldName='content' disableCoord='true'>"
         + "<Clause occurs='must'><TermFilter>rio</TermFilter></Clause>"
         + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
-    f = coreParser().filterFactory.getFilter(parseXML(text));
+    f = parseFilterXML(text);
     assertTrue("Expecting a TermFilter, but resulted in " + f.getClass(), f instanceof TermFilter);
 
     text = "<BooleanFilter fieldName='content' disableCoord='true'>"
@@ -109,7 +108,7 @@ public class TestBBCoreParserBoolean extends TestBBCoreParser {
         + "<Clause occurs='must'><TermFilter>janeiro</TermFilter></Clause>"
         + "<Clause occurs='must'><TermFilter>summit</TermFilter></Clause>"
         + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
-    f = coreParser().filterFactory.getFilter(parseXML(text));
+    f = parseFilterXML(text);
     assertTrue("Expecting a BooleanFilter, but resulted in " + f.getClass(), f instanceof BooleanFilter);
     BooleanFilter bf = (BooleanFilter)f;
     int size = bf.clauses().size();
@@ -122,13 +121,13 @@ public class TestBBCoreParserBoolean extends TestBBCoreParser {
     text = "<BooleanFilter fieldName='content' disableCoord='true'>"
         + "<Clause occurs='must'><MatchAllDocsFilter/></Clause>"
         + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
-    f = coreParser().filterFactory.getFilter(parseXML(text));
+    f = parseFilterXML(text);
     assertTrue("Expecting a MatchAllDocsFilter, but resulted in " + f.getClass(), f instanceof MatchAllDocsFilter);
 
     text = "<BooleanFilter fieldName='content' disableCoord='true'>"
         + "<Clause occurs='must'><MatchAllDocsFilter/></Clause>"
         + "<Clause occurs='mustnot'><TermFilter>summit</TermFilter></Clause></BooleanFilter>";
-    f = coreParser().filterFactory.getFilter(parseXML(text));
+    f = parseFilterXML(text);
     assertTrue("Expecting a BooleanFilter, but resulted in " + f.getClass(), f instanceof BooleanFilter);
     bf = (BooleanFilter)f;
     size = bf.clauses().size();
@@ -145,13 +144,5 @@ public class TestBBCoreParserBoolean extends TestBBCoreParser {
     Query query = parse("BooleanQueryDedupe.xml");
     Query resultQuery = parse("BooleanQueryDedupeResult.xml");
     assertEquals(resultQuery, query);
-  }
-
-  //================= Helper methods ===================================
-
-  private static Element parseXML(String text) throws ParserException {
-    InputStream xmlStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
-    org.w3c.dom.Document doc = CoreParser.parseXML(xmlStream);
-    return doc.getDocumentElement();
   }
 }
