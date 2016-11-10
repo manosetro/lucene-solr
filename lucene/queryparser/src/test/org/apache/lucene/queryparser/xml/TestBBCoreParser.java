@@ -166,11 +166,6 @@ public class TestBBCoreParser extends TestCoreParser {
     dumpResults("TermsFilter with all stop words", q, 5);
   }
   
-  public void testBooleanFilterXML() throws ParserException, IOException {
-    Query q = parse("BooleanFilter.xml");
-    dumpResults("Boolean filter", q, 5);
-  }
-
   public void testPhraseQueryXML() throws Exception {
     Query q = parse("PhraseQuery.xml");
     assertTrue("Expecting a PhraseQuery, but resulted in " + q.getClass(), q instanceof PhraseQuery);
@@ -307,106 +302,6 @@ public class TestBBCoreParser extends TestCoreParser {
     dumpResults("testNearFirstBooleanMust", fq, 5);
   }
   
-  public void testBooleanQueryTripleShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BooleanQueryTripleShouldWildcardNearQuery.xml");
-    final int size = ((BooleanQuery)q).clauses().size();
-    assertTrue("Expecting 2 clauses, but resulted in " + size, size == 2);
-    final BooleanQuery bq = (BooleanQuery)q;
-    for(BooleanClause bc : bq.clauses())
-    {
-      assertFalse("Not expecting MatchAllDocsQuery ",bc.getQuery() instanceof MatchAllDocsQuery);
-    }
-  }
-  
-  public void testBooleanQueryMustShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BooleanQueryMustShouldWildcardNearQuery.xml");
-    assertTrue("Expecting a IntervalFilterQuery, but resulted in " + q.getClass(), q instanceof IntervalFilterQuery);
-  }
-
-  public void testBooleanQueryMustMustShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BooleanQueryMustMustShouldWildcardNearQuery.xml");
-    assertTrue("Expecting a BooleanQuery, but resulted in " + q.getClass(), q instanceof BooleanQuery);
-    final BooleanQuery bq = (BooleanQuery)q;
-    final int size = bq.clauses().size();
-    assertTrue("Expecting 2 clauses, but resulted in " + size, size == 2);
-    for(BooleanClause bc : bq.clauses())
-    {
-      assertFalse("Not expecting MatchAllDocsQuery ", bc.getQuery() instanceof MatchAllDocsQuery);
-    }
-  }
-
-  public void testBooleanQueryMatchAllDocsQueryWildcardNearQuery() throws Exception {
-    final Query q = parse("BooleanQueryMatchAllDocsQueryWildcardNearQuery.xml");
-    assertTrue("Expecting a MatchAllDocsQuery, but resulted in " + q.getClass(), q instanceof MatchAllDocsQuery);
-  }
-
-  public void testBooleanQueryMatchAllDocsQueryTermQuery() throws Exception {
-    final Query q = parse("BooleanQueryMatchAllDocsQueryTermQuery.xml");
-    assertTrue("Expecting a BooleanQuery, but resulted in " + q.getClass(), q instanceof BooleanQuery);
-    final BooleanQuery bq = (BooleanQuery)q;
-    final int size = bq.clauses().size();
-    assertTrue("Expecting 2 clauses, but resulted in " + size, size == 2);
-    boolean bMatchAllDocsFound = false;
-    for(BooleanClause bc : bq.clauses())
-    {
-      bMatchAllDocsFound |= bc.getQuery() instanceof MatchAllDocsQuery;
-    }
-    assertTrue("Expecting MatchAllDocsQuery ", bMatchAllDocsFound);
-  }
-  
-  public void testBooleanFilterwithMatchAllDocsFilter() throws ParserException, IOException {
-    
-    String text = "<BooleanFilter fieldName='content' disableCoord='true'>"
-        + "<Clause occurs='should'><TermFilter>janeiro</TermFilter></Clause>"
-        + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
-    
-    Filter f = coreParser().filterFactory.getFilter(parseXML(text));
-    assertTrue("Expecting a TermFilter, but resulted in " + f.getClass(), f instanceof TermFilter);
-  
-    text = "<BooleanFilter fieldName='content' disableCoord='true'>"
-        + "<Clause occurs='must'><TermFilter>rio</TermFilter></Clause>"
-        + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
-    f = coreParser().filterFactory.getFilter(parseXML(text));
-    assertTrue("Expecting a TermFilter, but resulted in " + f.getClass(), f instanceof TermFilter);
-    
-    text = "<BooleanFilter fieldName='content' disableCoord='true'>"
-        + "<Clause occurs='must'><TermFilter>rio</TermFilter></Clause>"
-        + "<Clause occurs='must'><TermFilter>janeiro</TermFilter></Clause>"
-        + "<Clause occurs='must'><TermFilter>summit</TermFilter></Clause>"
-        + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
-    f = coreParser().filterFactory.getFilter(parseXML(text));
-    assertTrue("Expecting a BooleanFilter, but resulted in " + f.getClass(), f instanceof BooleanFilter);
-    BooleanFilter bf = (BooleanFilter)f;
-    int size = bf.clauses().size();
-    assertTrue("Expecting 3 clauses, but resulted in " + size, size == 3);
-    for(FilterClause fc : bf.clauses())
-    {
-      assertFalse("Not expecting MatchAllDocsQuery ", fc.getFilter() instanceof MatchAllDocsFilter);
-    }
-    
-    text = "<BooleanFilter fieldName='content' disableCoord='true'>"
-        + "<Clause occurs='must'><MatchAllDocsFilter/></Clause>"
-        + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
-    f = coreParser().filterFactory.getFilter(parseXML(text));
-    assertTrue("Expecting a MatchAllDocsFilter, but resulted in " + f.getClass(), f instanceof MatchAllDocsFilter);
-    
-    text = "<BooleanFilter fieldName='content' disableCoord='true'>"
-        + "<Clause occurs='must'><MatchAllDocsFilter/></Clause>"
-        + "<Clause occurs='mustnot'><TermFilter>summit</TermFilter></Clause></BooleanFilter>";
-    f = coreParser().filterFactory.getFilter(parseXML(text));
-    assertTrue("Expecting a BooleanFilter, but resulted in " + f.getClass(), f instanceof BooleanFilter);
-    bf = (BooleanFilter)f;
-    size = bf.clauses().size();
-    assertTrue("Expecting 2 clauses, but resulted in " + size, size == 2);
-    boolean bMatchAllDocsFound = false;
-    for(FilterClause fc : bf.clauses())
-    {
-      bMatchAllDocsFound |= fc.getFilter() instanceof MatchAllDocsFilter;
-    }
-    assertTrue("Expecting MatchAllDocsFilter ", bMatchAllDocsFound);
-    
-  }
-  
   public void testNearTermQuery() throws ParserException, IOException {
     int slop = 1;
     FieldedQuery[] subqueries = new FieldedQuery[2];
@@ -437,18 +332,5 @@ public class TestBBCoreParser extends TestCoreParser {
       BooleanQuery.setMaxClauseCount(maxClauseCount);
     }
   }
-  
-  public void testBooleanQueryDedupe() throws ParserException, IOException {
-    Query query = parse("BooleanQueryDedupe.xml");
-    Query resultQuery = parse("BooleanQueryDedupeResult.xml");
-    assertEquals(resultQuery, query);
-  }
 
-  //================= Helper methods ===================================
-
-  private static Element parseXML(String text) throws ParserException {
-    InputStream xmlStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
-    org.w3c.dom.Document doc = CoreParser.parseXML(xmlStream);
-    return doc.getDocumentElement();
-  }
 }
