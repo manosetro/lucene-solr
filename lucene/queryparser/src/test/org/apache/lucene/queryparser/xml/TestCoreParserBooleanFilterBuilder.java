@@ -24,6 +24,8 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.BooleanFilter;
 import org.apache.lucene.queries.FilterClause;
 import org.apache.lucene.queries.TermFilter;
+import org.apache.lucene.queryparser.xml.builders.BBBooleanFilterBuilder;
+import org.apache.lucene.queryparser.xml.builders.TermsFilterBuilder;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
@@ -36,10 +38,13 @@ import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TermRangeFilter;
 import org.apache.lucene.search.intervals.FieldedBooleanQuery;
 import org.apache.lucene.search.intervals.IntervalFilterQuery;
 import org.apache.lucene.search.intervals.OrderedNearQuery;
 import org.apache.lucene.search.intervals.UnorderedNearQuery;
+import org.junit.BeforeClass;
+import org.w3c.dom.Element;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,9 +52,45 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 
-public class TestCoreParserBooleanFilterBuilder extends TestBBCoreParser {
+public class TestCoreParserBooleanFilterBuilder extends TestCoreParser {
+
+  private static boolean useTermsFilter = false;
+  private static String matchAllDocsFilterName = "MatchAllDocsFilter";
+
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    useTermsFilter = random().nextBoolean();
+    if (random().nextBoolean()) {
+      matchAllDocsFilterName += random().nextInt(10);
+    }
+  }
+
+  protected CoreParser newCoreParser(String defaultField, Analyzer analyzer) {
+    final CoreParser coreParser = new CoreParser(defaultField, analyzer);
+
+    // the filter to be tested
+    coreParser.addFilterBuilder("BooleanFilter", new BBBooleanFilterBuilder(coreParser.filterFactory));
+
+    // sometimes but not always together with TermsFilter(Builder)
+    if (useTermsFilter) {
+      // used by lucene/queryparser/src/test/org/apache/lucene/queryparser/xml/BooleanFilter.xml
+      // org.apache and com.bloomberg.news BooleanFilterBuilder should both pass BooleanFilter.xml tests
+      coreParser.addFilterBuilder("TermsFilter", new TermsFilterBuilder(analyzer));
+    }
+
+    // always with MatchAllDocsFilter(Builder) but its element name can vary
+    coreParser.addFilterBuilder(matchAllDocsFilterName, new FilterBuilder() {
+      @Override
+      public Filter getFilter(Element e) throws ParserException {
+        return new MatchAllDocsFilter();
+      }
+    });
+
+    return coreParser;
+  }
 
   public void testBooleanFilterXML() throws ParserException, IOException {
+    assumeTrue("useTermsFilter", useTermsFilter);
     Query q = parse("BooleanFilter.xml");
     dumpResults("Boolean filter", q, 5);
   }
@@ -57,23 +98,23 @@ public class TestCoreParserBooleanFilterBuilder extends TestBBCoreParser {
   public void testBooleanFilterwithMatchAllDocsFilter() throws ParserException, IOException {
     
     String text = "<BooleanFilter fieldName='content' disableCoord='true'>"
-        + "<Clause occurs='should'><TermFilter>janeiro</TermFilter></Clause>"
-        + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
+        + "<Clause occurs='should'><RangeFilter fieldName='date' lowerTerm='19870409' upperTerm='19870412'/></Clause>"
+        + "<Clause occurs='should'><"+matchAllDocsFilterName+"/></Clause></BooleanFilter>";
     
     Filter f = parseFilterXML(text);
-    assertTrue("Expecting a TermFilter, but resulted in " + f.getClass(), f instanceof TermFilter);
+    assertTrue("Expecting a TermRangeFilter, but resulted in " + f.getClass(), f instanceof TermRangeFilter);
   
     text = "<BooleanFilter fieldName='content' disableCoord='true'>"
-        + "<Clause occurs='must'><TermFilter>rio</TermFilter></Clause>"
-        + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
+        + "<Clause occurs='must'><RangeFilter fieldName='date' lowerTerm='19870409' upperTerm='19870412'/></Clause>"
+        + "<Clause occurs='should'><"+matchAllDocsFilterName+"/></Clause></BooleanFilter>";
     f = parseFilterXML(text);
-    assertTrue("Expecting a TermFilter, but resulted in " + f.getClass(), f instanceof TermFilter);
+    assertTrue("Expecting a TermRangeFilter, but resulted in " + f.getClass(), f instanceof TermRangeFilter);
     
     text = "<BooleanFilter fieldName='content' disableCoord='true'>"
-        + "<Clause occurs='must'><TermFilter>rio</TermFilter></Clause>"
-        + "<Clause occurs='must'><TermFilter>janeiro</TermFilter></Clause>"
-        + "<Clause occurs='must'><TermFilter>summit</TermFilter></Clause>"
-        + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
+        + "<Clause occurs='must'><RangeFilter fieldName='date' lowerTerm='19870409' upperTerm='19870410'/></Clause>"
+        + "<Clause occurs='must'><RangeFilter fieldName='date' lowerTerm='19870410' upperTerm='19870411'/></Clause>"
+        + "<Clause occurs='must'><RangeFilter fieldName='date' lowerTerm='19870411' upperTerm='19870412'/></Clause>"
+        + "<Clause occurs='should'><"+matchAllDocsFilterName+"/></Clause></BooleanFilter>";
     f = parseFilterXML(text);
     assertTrue("Expecting a BooleanFilter, but resulted in " + f.getClass(), f instanceof BooleanFilter);
     BooleanFilter bf = (BooleanFilter)f;
@@ -85,14 +126,14 @@ public class TestCoreParserBooleanFilterBuilder extends TestBBCoreParser {
     }
     
     text = "<BooleanFilter fieldName='content' disableCoord='true'>"
-        + "<Clause occurs='must'><MatchAllDocsFilter/></Clause>"
-        + "<Clause occurs='should'><MatchAllDocsFilter/></Clause></BooleanFilter>";
+        + "<Clause occurs='must'><"+matchAllDocsFilterName+"/></Clause>"
+        + "<Clause occurs='should'><"+matchAllDocsFilterName+"/></Clause></BooleanFilter>";
     f = parseFilterXML(text);
     assertTrue("Expecting a MatchAllDocsFilter, but resulted in " + f.getClass(), f instanceof MatchAllDocsFilter);
     
     text = "<BooleanFilter fieldName='content' disableCoord='true'>"
-        + "<Clause occurs='must'><MatchAllDocsFilter/></Clause>"
-        + "<Clause occurs='mustnot'><TermFilter>summit</TermFilter></Clause></BooleanFilter>";
+        + "<Clause occurs='must'><"+matchAllDocsFilterName+"/></Clause>"
+        + "<Clause occurs='mustnot'><RangeFilter fieldName='date' lowerTerm='19871201' upperTerm='19871231'/></Clause></BooleanFilter>";
     f = parseFilterXML(text);
     assertTrue("Expecting a BooleanFilter, but resulted in " + f.getClass(), f instanceof BooleanFilter);
     bf = (BooleanFilter)f;
