@@ -1,7 +1,3 @@
-package org.apache.lucene.queryparser.xml;
-
-import org.apache.lucene.analysis.Analyzer;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,9 +15,11 @@ import org.apache.lucene.analysis.Analyzer;
  * limitations under the License.
  */
 
+package org.apache.lucene.queryparser.xml;
+
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queries.BooleanFilter;
 import org.apache.lucene.queries.FilterClause;
-import org.apache.lucene.queries.TermFilter;
 import org.apache.lucene.queryparser.xml.builders.BBBooleanFilterBuilder;
 import org.apache.lucene.queryparser.xml.builders.TermsFilterBuilder;
 import org.apache.lucene.search.Filter;

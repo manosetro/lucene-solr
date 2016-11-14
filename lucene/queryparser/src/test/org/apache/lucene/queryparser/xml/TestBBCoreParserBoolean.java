@@ -1,5 +1,3 @@
-package org.apache.lucene.queryparser.xml;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +15,8 @@ package org.apache.lucene.queryparser.xml;
  * limitations under the License.
  */
 
+package org.apache.lucene.queryparser.xml;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.xml.builders.BBBooleanQueryBuilder;
 import org.apache.lucene.queryparser.xml.builders.GenericTextQueryBuilder;
@@ -27,7 +27,6 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.spans.SpanQuery;
-
 import java.io.IOException;
 
 
