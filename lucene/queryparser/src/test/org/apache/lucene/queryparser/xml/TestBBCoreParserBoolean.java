@@ -17,6 +17,11 @@ package org.apache.lucene.queryparser.xml;
  * limitations under the License.
  */
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.queryparser.xml.builders.BBBooleanQueryBuilder;
+import org.apache.lucene.queryparser.xml.builders.GenericTextQueryBuilder;
+import org.apache.lucene.queryparser.xml.builders.NearQueryBuilder;
+import org.apache.lucene.queryparser.xml.builders.WildcardNearQueryBuilder;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
@@ -26,7 +31,42 @@ import org.apache.lucene.search.spans.SpanQuery;
 import java.io.IOException;
 
 
-public class TestBBCoreParserBoolean extends TestBBCoreParser {
+public class TestBBCoreParserBoolean extends TestCoreParser {
+
+  protected CoreParser newCoreParser(String defaultField, Analyzer analyzer) {
+    final CoreParser coreParser = new CoreParser(defaultField, analyzer);
+
+    // the query builder to be tested
+    {
+      String queryName = "BooleanQuery";
+      BBBooleanQueryBuilder builder = new BBBooleanQueryBuilder(coreParser.queryFactory, coreParser.spanFactory);
+      coreParser.addQueryBuilder(queryName, builder);
+      coreParser.addSpanBuilder(queryName, builder);
+    }
+
+    // some additional builders to help
+    {
+      String queryName = "GenericTextQuery";
+      GenericTextQueryBuilder builder = new GenericTextQueryBuilder(analyzer);
+      coreParser.addQueryBuilder(queryName, builder);
+      // This does not implement SpanQueryBuilder yet
+      //coreParser.addSpanBuilder(queryName, builder);
+    }
+    {
+      String queryName = "NearQuery";
+      NearQueryBuilder builder = new NearQueryBuilder(coreParser.spanFactory);
+      coreParser.addQueryBuilder(queryName, builder);
+      coreParser.addSpanBuilder(queryName, builder);
+    }
+    {
+      String queryName = "WildcardNearQuery";
+      WildcardNearQueryBuilder builder = new WildcardNearQueryBuilder(analyzer);
+      coreParser.addQueryBuilder(queryName, builder);
+      coreParser.addSpanBuilder(queryName, builder);
+    }
+
+    return coreParser;
+  }
 
   public void testBooleanQueryTripleShouldWildcardNearQuery() throws Exception {
     final Query q = parse("BooleanQueryTripleShouldWildcardNearQuery.xml");
