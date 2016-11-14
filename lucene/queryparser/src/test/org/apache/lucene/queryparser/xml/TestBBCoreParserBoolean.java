@@ -24,6 +24,10 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.BooleanFilter;
 import org.apache.lucene.queries.FilterClause;
 import org.apache.lucene.queries.TermFilter;
+import org.apache.lucene.queryparser.xml.builders.BBBooleanQueryBuilder;
+import org.apache.lucene.queryparser.xml.builders.GenericTextQueryBuilder;
+import org.apache.lucene.queryparser.xml.builders.NearQueryBuilder;
+import org.apache.lucene.queryparser.xml.builders.WildcardNearQueryBuilder;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
@@ -47,7 +51,21 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 
-public class TestBBCoreParserBoolean extends TestBBCoreParser {
+public class TestBBCoreParserBoolean extends TestCoreParser {
+
+  protected CoreParser newCoreParser(String defaultField, Analyzer analyzer) {
+    final CoreParser coreParser = new CoreParser(defaultField, analyzer);
+
+    // the query builder to be tested
+    coreParser.addQueryBuilder("BooleanQuery", new BBBooleanQueryBuilder(coreParser.queryFactory));
+
+    // some additional builders to help
+    coreParser.addQueryBuilder("GenericTextQuery", new GenericTextQueryBuilder(analyzer));
+    coreParser.addQueryBuilder("NearQuery", new NearQueryBuilder(coreParser.queryFactory));
+    coreParser.addQueryBuilder("WildcardNearQuery", new WildcardNearQueryBuilder(analyzer));
+
+    return coreParser;
+  }
 
   public void testBooleanQueryTripleShouldWildcardNearQuery() throws Exception {
     final Query q = parse("BooleanQueryTripleShouldWildcardNearQuery.xml");
