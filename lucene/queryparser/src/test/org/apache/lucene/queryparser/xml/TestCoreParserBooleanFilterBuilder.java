@@ -1,5 +1,3 @@
-package org.apache.lucene.queryparser.xml;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,39 +15,21 @@ package org.apache.lucene.queryparser.xml;
  * limitations under the License.
  */
 
+package org.apache.lucene.queryparser.xml;
+
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.core.KeywordAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.BooleanFilter;
 import org.apache.lucene.queries.FilterClause;
-import org.apache.lucene.queries.TermFilter;
 import org.apache.lucene.queryparser.xml.builders.BBBooleanFilterBuilder;
 import org.apache.lucene.queryparser.xml.builders.TermsFilterBuilder;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.DisjunctionMaxQuery;
-import org.apache.lucene.search.FieldedQuery;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.MatchAllDocsFilter;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.MultiTermQuery;
-import org.apache.lucene.search.PhraseQuery;
-import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeFilter;
-import org.apache.lucene.search.intervals.FieldedBooleanQuery;
-import org.apache.lucene.search.intervals.IntervalFilterQuery;
-import org.apache.lucene.search.intervals.OrderedNearQuery;
-import org.apache.lucene.search.intervals.UnorderedNearQuery;
 import org.junit.BeforeClass;
 import org.w3c.dom.Element;
 
 import java.io.IOException;
-import java.io.InputStream;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 
 public class TestCoreParserBooleanFilterBuilder extends TestCoreParser {
