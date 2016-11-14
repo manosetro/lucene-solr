@@ -68,7 +68,7 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
   }
 
   public void testBooleanQueryTripleShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BooleanQueryTripleShouldWildcardNearQuery.xml");
+    final Query q = parse("BBBooleanQueryTripleShouldWildcardNearQuery.xml");
     final int size = ((BooleanQuery)q).clauses().size();
     assertTrue("Expecting 2 clauses, but resulted in " + size, size == 2);
     final BooleanQuery bq = (BooleanQuery)q;
@@ -79,12 +79,12 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
   }
   
   public void testBooleanQueryMustShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BooleanQueryMustShouldWildcardNearQuery.xml");
+    final Query q = parse("BBBooleanQueryMustShouldWildcardNearQuery.xml");
     assertTrue("Expecting a IntervalFilterQuery, but resulted in " + q.getClass(), q instanceof IntervalFilterQuery);
   }
 
   public void testBooleanQueryMustMustShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BooleanQueryMustMustShouldWildcardNearQuery.xml");
+    final Query q = parse("BBBooleanQueryMustMustShouldWildcardNearQuery.xml");
     assertTrue("Expecting a BooleanQuery, but resulted in " + q.getClass(), q instanceof BooleanQuery);
     final BooleanQuery bq = (BooleanQuery)q;
     final int size = bq.clauses().size();
@@ -96,12 +96,12 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
   }
 
   public void testBooleanQueryMatchAllDocsQueryWildcardNearQuery() throws Exception {
-    final Query q = parse("BooleanQueryMatchAllDocsQueryWildcardNearQuery.xml");
+    final Query q = parse("BBBooleanQueryMatchAllDocsQueryWildcardNearQuery.xml");
     assertTrue("Expecting a MatchAllDocsQuery, but resulted in " + q.getClass(), q instanceof MatchAllDocsQuery);
   }
 
   public void testBooleanQueryMatchAllDocsQueryTermQuery() throws Exception {
-    final Query q = parse("BooleanQueryMatchAllDocsQueryTermQuery.xml");
+    final Query q = parse("BBBooleanQueryMatchAllDocsQueryTermQuery.xml");
     assertTrue("Expecting a BooleanQuery, but resulted in " + q.getClass(), q instanceof BooleanQuery);
     final BooleanQuery bq = (BooleanQuery)q;
     final int size = bq.clauses().size();
@@ -115,8 +115,8 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
   }
   
   public void testBooleanQueryDedupe() throws ParserException, IOException {
-    Query query = parse("BooleanQueryDedupe.xml");
-    Query resultQuery = parse("BooleanQueryDedupeResult.xml");
+    Query query = parse("BBBooleanQueryDedupe.xml");
+    Query resultQuery = parse("BBBooleanQueryDedupeResult.xml");
     assertEquals(resultQuery, query);
   }
 }
