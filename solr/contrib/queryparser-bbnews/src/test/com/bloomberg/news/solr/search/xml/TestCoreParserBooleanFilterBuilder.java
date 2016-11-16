@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.lucene.queryparser.xml;
+package com.bloomberg.news.solr.search.xml;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queries.BooleanFilter;
 import org.apache.lucene.queries.FilterClause;
-import org.apache.lucene.queryparser.xml.builders.BBBooleanFilterBuilder;
+import org.apache.lucene.queryparser.xml.CoreParser;
+import org.apache.lucene.queryparser.xml.FilterBuilder;
+import org.apache.lucene.queryparser.xml.ParserException;
+import org.apache.lucene.queryparser.xml.TestCoreParser;
 import org.apache.lucene.queryparser.xml.builders.TermsFilterBuilder;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.MatchAllDocsFilter;
@@ -32,7 +35,6 @@ import org.w3c.dom.Element;
 import java.io.IOException;
 
 
-@Deprecated // in favour of com.bloomberg.news.*.TestCoreParserBooleanFilterBuilder
 public class TestCoreParserBooleanFilterBuilder extends TestCoreParser {
 
   private static boolean useTermsFilter = false;
@@ -46,11 +48,17 @@ public class TestCoreParserBooleanFilterBuilder extends TestCoreParser {
     }
   }
 
-  protected CoreParser newCoreParser(String defaultField, Analyzer analyzer) {
-    final CoreParser coreParser = new CoreParser(defaultField, analyzer);
+  private class CoreParserBooleanFilter extends CoreParser {
+    CoreParserBooleanFilter(String defaultField, Analyzer analyzer) {
+      super(defaultField, analyzer);
 
-    // the filter to be tested
-    coreParser.addFilterBuilder("BooleanFilter", new BBBooleanFilterBuilder(coreParser.filterFactory));
+      // the filter to be tested
+      filterFactory.addBuilder("BooleanFilter", new BooleanFilterBuilder(filterFactory));
+    }
+  }
+
+  protected CoreParser newCoreParser(String defaultField, Analyzer analyzer) {
+    final CoreParser coreParser = new CoreParserBooleanFilter(defaultField, analyzer);
 
     // sometimes but not always together with TermsFilter(Builder)
     if (useTermsFilter) {

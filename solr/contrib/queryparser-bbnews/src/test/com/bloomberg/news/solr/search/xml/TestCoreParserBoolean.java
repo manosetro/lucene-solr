@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.lucene.queryparser.xml;
+package com.bloomberg.news.solr.search.xml;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.queryparser.xml.builders.BBBooleanQueryBuilder;
+import org.apache.lucene.queryparser.xml.CoreParser;
+import org.apache.lucene.queryparser.xml.ParserException;
+import org.apache.lucene.queryparser.xml.TestCoreParser;
 import org.apache.lucene.queryparser.xml.builders.GenericTextQueryBuilder;
 import org.apache.lucene.queryparser.xml.builders.NearQueryBuilder;
 import org.apache.lucene.queryparser.xml.builders.WildcardNearQueryBuilder;
@@ -28,21 +30,33 @@ import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.spans.SpanQuery;
 import java.io.IOException;
+import java.io.InputStream;
 
 
-@Deprecated // in favour of com.bloomberg.news.*.TestCoreParserBoolean
-public class TestBBCoreParserBoolean extends TestCoreParser {
+public class TestCoreParserBoolean extends TestCoreParser {
+
+  private class CoreParserBooleanQuery extends CoreParser {
+    public CoreParserBooleanQuery(String defaultField, Analyzer analyzer) {
+      super(defaultField, analyzer);
+
+      // the query builder to be tested
+      {
+        String queryName = "BooleanQuery";
+        BooleanQueryBuilder builder = new BooleanQueryBuilder(queryFactory, spanFactory);
+        queryFactory.addBuilder(queryName, builder);
+        spanFactory.addBuilder(queryName, builder);
+      }
+      {
+        String queryName = "NearQuery";
+        NearQueryBuilder builder = new NearQueryBuilder(spanFactory);
+        queryFactory.addBuilder(queryName, builder);
+        spanFactory.addBuilder(queryName, builder);
+      }
+    }
+  }
 
   protected CoreParser newCoreParser(String defaultField, Analyzer analyzer) {
-    final CoreParser coreParser = new CoreParser(defaultField, analyzer);
-
-    // the query builder to be tested
-    {
-      String queryName = "BooleanQuery";
-      BBBooleanQueryBuilder builder = new BBBooleanQueryBuilder(coreParser.queryFactory, coreParser.spanFactory);
-      coreParser.addQueryBuilder(queryName, builder);
-      coreParser.addSpanBuilder(queryName, builder);
-    }
+    final CoreParser coreParser = new CoreParserBooleanQuery(defaultField, analyzer);
 
     // some additional builders to help
     {
@@ -51,12 +65,6 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
       coreParser.addQueryBuilder(queryName, builder);
       // This does not implement SpanQueryBuilder yet
       //coreParser.addSpanBuilder(queryName, builder);
-    }
-    {
-      String queryName = "NearQuery";
-      NearQueryBuilder builder = new NearQueryBuilder(coreParser.spanFactory);
-      coreParser.addQueryBuilder(queryName, builder);
-      coreParser.addSpanBuilder(queryName, builder);
     }
     {
       String queryName = "WildcardNearQuery";
@@ -68,8 +76,20 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
     return coreParser;
   }
 
+  @Override
+  protected Query parse(String xmlFileName) throws ParserException, IOException {
+    try (InputStream xmlStream = TestCoreParserBoolean.class.getResourceAsStream(xmlFileName)) {
+      if (xmlStream == null) {
+        return super.parse(xmlFileName);
+      }
+      assertNotNull("Test XML file " + xmlFileName + " cannot be found", xmlStream);
+      Query result = coreParser().parse(xmlStream);
+      return result;
+    }
+  }
+
   public void testBooleanQueryTripleShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BBBooleanQueryTripleShouldWildcardNearQuery.xml");
+    final Query q = parse("BooleanQueryTripleShouldWildcardNearQuery.xml");
     final int size = ((BooleanQuery)q).clauses().size();
     assertTrue("Expecting 2 clauses, but resulted in " + size, size == 2);
     final BooleanQuery bq = (BooleanQuery)q;
@@ -80,12 +100,12 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
   }
 
   public void testBooleanQueryMustShouldWildcardNearQuery() throws ParserException, IOException {
-    final Query q = parse("BBBooleanQueryMustShouldWildcardNearQuery.xml");
+    final Query q = parse("BooleanQueryMustShouldWildcardNearQuery.xml");
     assertTrue("Expecting a SpanQuery, but resulted in " + q.getClass(), q instanceof SpanQuery);
   }
 
   public void testBooleanQueryMustMustShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BBBooleanQueryMustMustShouldWildcardNearQuery.xml");
+    final Query q = parse("BooleanQueryMustMustShouldWildcardNearQuery.xml");
     assertTrue("Expecting a BooleanQuery, but resulted in " + q.getClass(), q instanceof BooleanQuery);
     final BooleanQuery bq = (BooleanQuery)q;
     final int size = bq.clauses().size();
@@ -97,12 +117,12 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
   }
 
   public void testBooleanQueryMatchAllDocsQueryWildcardNearQuery() throws Exception {
-    final Query q = parse("BBBooleanQueryMatchAllDocsQueryWildcardNearQuery.xml");
+    final Query q = parse("BooleanQueryMatchAllDocsQueryWildcardNearQuery.xml");
     assertTrue("Expecting a MatchAllDocsQuery, but resulted in " + q.getClass(), q instanceof MatchAllDocsQuery);
   }
 
   public void testBooleanQueryMatchAllDocsQueryTermQuery() throws Exception {
-    final Query q = parse("BBBooleanQueryMatchAllDocsQueryTermQuery.xml");
+    final Query q = parse("BooleanQueryMatchAllDocsQueryTermQuery.xml");
     assertTrue("Expecting a BooleanQuery, but resulted in " + q.getClass(), q instanceof BooleanQuery);
     final BooleanQuery bq = (BooleanQuery)q;
     final int size = bq.clauses().size();
@@ -116,8 +136,8 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
   }
 
   public void testBooleanQueryDedupe() throws ParserException, IOException {
-    Query query = parse("BBBooleanQueryDedupe.xml");
-    Query resultQuery = parse("BBBooleanQueryDedupeResult.xml");
+    Query query = parse("BooleanQueryDedupe.xml");
+    Query resultQuery = parse("BooleanQueryDedupeResult.xml");
     assertEquals(resultQuery, query);
   }
 }

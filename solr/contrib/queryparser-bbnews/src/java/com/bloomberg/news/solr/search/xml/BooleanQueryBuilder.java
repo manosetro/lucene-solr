@@ -1,7 +1,7 @@
 /*
  * Created on 25-Jan-2006
  */
-package org.apache.lucene.queryparser.xml.builders;
+package com.bloomberg.news.solr.search.xml;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,6 +18,7 @@ import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.queryparser.xml.DOMUtils;
 import org.apache.lucene.queryparser.xml.ParserException;
 import org.apache.lucene.queryparser.xml.QueryBuilder;
+import org.apache.lucene.queryparser.xml.builders.SpanQueryBuilder;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -41,13 +42,12 @@ import org.w3c.dom.NodeList;
 /**
  * Builder for {@link BooleanQuery}
  */
-@Deprecated // in favour of com.bloomberg.news.*.BooleanQueryBuilder
-public class BBBooleanQueryBuilder implements QueryBuilder, SpanQueryBuilder {
+public class BooleanQueryBuilder implements QueryBuilder, SpanQueryBuilder {
 
   private final QueryBuilder factory;
   private final SpanQueryBuilder spanFactory;
 
-  public BBBooleanQueryBuilder(QueryBuilder factory, SpanQueryBuilder spanFactory) {
+  public BooleanQueryBuilder(QueryBuilder factory, SpanQueryBuilder spanFactory) {
     this.factory = factory;
     this.spanFactory = spanFactory;
   }

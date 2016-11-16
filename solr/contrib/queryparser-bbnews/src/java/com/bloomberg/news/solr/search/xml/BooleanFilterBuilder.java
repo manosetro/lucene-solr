@@ -1,8 +1,7 @@
 /*
  * Created on 25-Jan-2006
  */
-package org.apache.lucene.queryparser.xml.builders;
-
+package com.bloomberg.news.solr.search.xml;
 import java.util.HashSet;
 
 import org.apache.lucene.search.BooleanClause;
@@ -37,12 +36,11 @@ import org.w3c.dom.NodeList;
 /**
  * Builder for {@link BooleanFilter}
  */
-@Deprecated // in favour of com.bloomberg.news.*.BooleanFilterBuilder
-public class BBBooleanFilterBuilder implements FilterBuilder {
+public class BooleanFilterBuilder implements FilterBuilder {
 
   private final FilterBuilder factory;
 
-  public BBBooleanFilterBuilder(FilterBuilder factory) {
+  public BooleanFilterBuilder(FilterBuilder factory) {
     this.factory = factory;
   }
 
