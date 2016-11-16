@@ -1,7 +1,7 @@
 /*
  * Created on 25-Jan-2006
  */
-package org.apache.lucene.queryparser.xml.builders;
+package com.bloomberg.news.solr.search.xml;
 
 import java.util.HashSet;
 
@@ -35,12 +35,11 @@ import org.w3c.dom.NodeList;
 /**
  * Builder for {@link BooleanQuery}
  */
-@Deprecated // in favour of com.bloomberg.news.*.BooleanQueryBuilder
-public class BBBooleanQueryBuilder implements QueryBuilder {
+public class BooleanQueryBuilder implements QueryBuilder {
 
   private final QueryBuilder factory;
 
-  public BBBooleanQueryBuilder(QueryBuilder factory) {
+  public BooleanQueryBuilder(QueryBuilder factory) {
     this.factory = factory;
   }
 

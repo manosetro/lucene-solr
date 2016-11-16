@@ -15,40 +15,64 @@
  * limitations under the License.
  */
 
-package org.apache.lucene.queryparser.xml;
+package com.bloomberg.news.solr.search.xml;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.queryparser.xml.builders.BBBooleanQueryBuilder;
 import org.apache.lucene.queryparser.xml.builders.GenericTextQueryBuilder;
 import org.apache.lucene.queryparser.xml.builders.NearQueryBuilder;
 import org.apache.lucene.queryparser.xml.builders.WildcardNearQueryBuilder;
+import org.apache.lucene.queryparser.xml.CoreParser;
+import org.apache.lucene.queryparser.xml.ParserException;
+import org.apache.lucene.queryparser.xml.TestCoreParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.intervals.IntervalFilterQuery;
+
 import java.io.IOException;
+import java.io.InputStream;
 
 
-@Deprecated // in favour of com.bloomberg.news.*.TestCoreParserBoolean
-public class TestBBCoreParserBoolean extends TestCoreParser {
+public class TestCoreParserBoolean extends TestCoreParser {
+
+  private class CoreParserBooleanQuery extends CoreParser {
+    CoreParserBooleanQuery(String defaultField, Analyzer analyzer) {
+      super(defaultField, analyzer);
+
+      // the query builder to be tested
+      queryFactory.addBuilder("BooleanQuery", new BooleanQueryBuilder(queryFactory));
+
+      // some additional builders to help
+      // (here only since requiring access to queryFactory)
+      queryFactory.addBuilder("NearQuery", new NearQueryBuilder(queryFactory));
+    }
+  }
 
   protected CoreParser newCoreParser(String defaultField, Analyzer analyzer) {
-    final CoreParser coreParser = new CoreParser(defaultField, analyzer);
-
-    // the query builder to be tested
-    coreParser.addQueryBuilder("BooleanQuery", new BBBooleanQueryBuilder(coreParser.queryFactory));
+    final CoreParser coreParser = new CoreParserBooleanQuery(defaultField, analyzer);
 
     // some additional builders to help
     coreParser.addQueryBuilder("GenericTextQuery", new GenericTextQueryBuilder(analyzer));
-    coreParser.addQueryBuilder("NearQuery", new NearQueryBuilder(coreParser.queryFactory));
     coreParser.addQueryBuilder("WildcardNearQuery", new WildcardNearQueryBuilder(analyzer));
 
     return coreParser;
   }
 
+  @Override
+  protected Query parse(String xmlFileName) throws ParserException, IOException {
+    try (InputStream xmlStream = TestCoreParserBoolean.class.getResourceAsStream(xmlFileName)) {
+      if (xmlStream == null) {
+        return super.parse(xmlFileName);
+      }
+      assertNotNull("Test XML file " + xmlFileName + " cannot be found", xmlStream);
+      Query result = coreParser().parse(xmlStream);
+      return result;
+    }
+  }
+
   public void testBooleanQueryTripleShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BBBooleanQueryTripleShouldWildcardNearQuery.xml");
+    final Query q = parse("BooleanQueryTripleShouldWildcardNearQuery.xml");
     final int size = ((BooleanQuery)q).clauses().size();
     assertTrue("Expecting 2 clauses, but resulted in " + size, size == 2);
     final BooleanQuery bq = (BooleanQuery)q;
@@ -59,12 +83,12 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
   }
   
   public void testBooleanQueryMustShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BBBooleanQueryMustShouldWildcardNearQuery.xml");
+    final Query q = parse("BooleanQueryMustShouldWildcardNearQuery.xml");
     assertTrue("Expecting a IntervalFilterQuery, but resulted in " + q.getClass(), q instanceof IntervalFilterQuery);
   }
 
   public void testBooleanQueryMustMustShouldWildcardNearQuery() throws Exception {
-    final Query q = parse("BBBooleanQueryMustMustShouldWildcardNearQuery.xml");
+    final Query q = parse("BooleanQueryMustMustShouldWildcardNearQuery.xml");
     assertTrue("Expecting a BooleanQuery, but resulted in " + q.getClass(), q instanceof BooleanQuery);
     final BooleanQuery bq = (BooleanQuery)q;
     final int size = bq.clauses().size();
@@ -76,12 +100,12 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
   }
 
   public void testBooleanQueryMatchAllDocsQueryWildcardNearQuery() throws Exception {
-    final Query q = parse("BBBooleanQueryMatchAllDocsQueryWildcardNearQuery.xml");
+    final Query q = parse("BooleanQueryMatchAllDocsQueryWildcardNearQuery.xml");
     assertTrue("Expecting a MatchAllDocsQuery, but resulted in " + q.getClass(), q instanceof MatchAllDocsQuery);
   }
 
   public void testBooleanQueryMatchAllDocsQueryTermQuery() throws Exception {
-    final Query q = parse("BBBooleanQueryMatchAllDocsQueryTermQuery.xml");
+    final Query q = parse("BooleanQueryMatchAllDocsQueryTermQuery.xml");
     assertTrue("Expecting a BooleanQuery, but resulted in " + q.getClass(), q instanceof BooleanQuery);
     final BooleanQuery bq = (BooleanQuery)q;
     final int size = bq.clauses().size();
@@ -95,8 +119,8 @@ public class TestBBCoreParserBoolean extends TestCoreParser {
   }
   
   public void testBooleanQueryDedupe() throws ParserException, IOException {
-    Query query = parse("BBBooleanQueryDedupe.xml");
-    Query resultQuery = parse("BBBooleanQueryDedupeResult.xml");
+    Query query = parse("BooleanQueryDedupe.xml");
+    Query resultQuery = parse("BooleanQueryDedupeResult.xml");
     assertEquals(resultQuery, query);
   }
 }

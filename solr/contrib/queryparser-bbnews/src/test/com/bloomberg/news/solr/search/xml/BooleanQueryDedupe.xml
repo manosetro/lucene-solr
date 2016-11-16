@@ -6,7 +6,6 @@
     in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF 
     ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under 
     the License. -->
-<!-- deprecated in favour of com.bloomberg.news.* equivalent -->
 <BooleanQuery disableCoord="true">
     <!-- Q1: news* in headline or body fields -->
     <Clause occurs="must">
@@ -22,6 +21,20 @@
             <GenericTextQuery wnq="true" fieldName="body">brexit</GenericTextQuery>
         </DisjunctionMaxQuery>
     </Clause>
+    <!-- Q1 repeats-->
+    <Clause occurs="must">
+        <DisjunctionMaxQuery>
+            <GenericTextQuery wnq="true" fieldName="headline">news*</GenericTextQuery>
+            <GenericTextQuery wnq="true" fieldName="body">news*</GenericTextQuery>
+        </DisjunctionMaxQuery>
+    </Clause>
+    <!-- Q2 repeats-->
+    <Clause occurs="must">
+        <DisjunctionMaxQuery>
+            <GenericTextQuery wnq="true" fieldName="headline">brexit</GenericTextQuery>
+            <GenericTextQuery wnq="true" fieldName="body">brexit</GenericTextQuery>
+        </DisjunctionMaxQuery>
+    </Clause>
     <!-- Q3: news* in headline: just one field search and a should clause -->
     <Clause occurs="should">
         <GenericTextQuery wnq="true" fieldName="headline">news*</GenericTextQuery>
@@ -30,22 +43,54 @@
     <Clause occurs="must">
         <GenericTextQuery wnq="true" fieldName="body">bloomberg</GenericTextQuery>
     </Clause>
+    <!-- Q3 repeats -->
+    <Clause occurs="should">
+        <GenericTextQuery wnq="true" fieldName="headline">news*</GenericTextQuery>
+    </Clause>
     <!--Q5 wildcard phrase query "finance melt*" and mustnot case-->
     <Clause occurs="mustnot">
         <GenericTextQuery wnq="true" fieldName="headline">finance melt*</GenericTextQuery>
     </Clause>
-    <!--Q6: resultant form of 'barack Near/4 (obama and obama)' and 'barack Near/4 obama'-->
+    <!--Q6: UnorderedNearQuery: barack Near (obama AND obama). one with un-necessary obama repeated as must clause but as an inner query -->
+    <Clause occurs="must">
+        <NearQuery fieldName="body" slop="4" inOrder="false">
+            <WildcardNearQuery>barack</WildcardNearQuery>
+            <BooleanQuery disableCoord="true">
+                <Clause occurs="must">
+                    <WildcardNearQuery>obama</WildcardNearQuery>
+                </Clause>
+                <Clause occurs="must">
+                    <WildcardNearQuery>obama</WildcardNearQuery>
+                </Clause>
+            </BooleanQuery>
+        </NearQuery>
+    </Clause>
+    <!--Q7: OrderedNearQuery and consecutive repeat case-->
+    <Clause occurs="must">
+        <NearQuery fieldName="headline" slop="4" inOrder="true">
+            <WildcardNearQuery>obama</WildcardNearQuery>
+            <WildcardNearQuery>uk</WildcardNearQuery>
+        </NearQuery>
+    </Clause>
+    <!--Q7: this should get deduped-->
+    <Clause occurs="must">
+        <NearQuery fieldName="headline" slop="4" inOrder="true">
+            <WildcardNearQuery>obama</WildcardNearQuery>
+            <WildcardNearQuery>uk</WildcardNearQuery>
+        </NearQuery>
+    </Clause>
+    <!--Q6: This is a boiled down version of Q6 above and would get deduped resulting in this simple form-->
     <Clause occurs="must">
         <NearQuery fieldName="body" slop="4" inOrder="false">
             <WildcardNearQuery>barack</WildcardNearQuery>
             <WildcardNearQuery>obama</WildcardNearQuery>
         </NearQuery>
     </Clause>
-    <!--Q7: OrderedNearQuery -->
-    <Clause occurs="must">
-        <NearQuery fieldName="headline" slop="4" inOrder="true">
-            <WildcardNearQuery>obama</WildcardNearQuery>
-            <WildcardNearQuery>uk</WildcardNearQuery>
+    <!--Q5 repeats in different form as a near query  -->
+    <Clause occurs="mustnot">
+        <NearQuery fieldName="headline" slop="0" inOrder="true">
+            <WildcardNearQuery>finance</WildcardNearQuery>
+            <WildcardNearQuery>melt*</WildcardNearQuery>
         </NearQuery>
     </Clause>
 </BooleanQuery>

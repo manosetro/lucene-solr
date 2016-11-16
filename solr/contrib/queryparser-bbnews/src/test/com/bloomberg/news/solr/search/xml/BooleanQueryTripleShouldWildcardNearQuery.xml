@@ -15,8 +15,8 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<!-- deprecated in favour of com.bloomberg.news.* equivalent -->
 <BooleanQuery fieldName='content' disableCoord='true'>
-  <Clause occurs='must'><WildcardNearQuery>rio de janeiro</WildcardNearQuery></Clause>
+  <Clause occurs='should'><WildcardNearQuery>rio de janeiro</WildcardNearQuery></Clause>
+  <Clause occurs='should'><WildcardNearQuery>summit</WildcardNearQuery></Clause>
   <Clause occurs='should'><WildcardNearQuery> </WildcardNearQuery></Clause>
 </BooleanQuery>

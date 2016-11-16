@@ -15,6 +15,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
+<!-- deprecated in favour of com.bloomberg.news.* equivalent -->
 <BooleanQuery fieldName='content' disableCoord='true'>
   <Clause occurs='must'><MatchAllDocsQuery/></Clause>
   <Clause occurs='mustnot'><TermQuery>summit</TermQuery></Clause>
