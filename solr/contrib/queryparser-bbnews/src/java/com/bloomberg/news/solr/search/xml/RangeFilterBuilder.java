@@ -48,8 +48,8 @@ public class RangeFilterBuilder extends SolrFilterBuilder {
     static final TrieDateField dateField = new TrieDateField();
 
     public RangeFilterBuilder(String defaultField, Analyzer analyzer,
-        SolrQueryRequest req) {
-        super(defaultField, analyzer, req);
+        SolrQueryRequest req, FilterBuilder filterFactory) {
+        super(defaultField, analyzer, req, filterFactory);
     }
 
     @SuppressWarnings("deprecation")
