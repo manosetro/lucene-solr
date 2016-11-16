@@ -67,8 +67,8 @@ public class SolrCoreParser extends CoreParser implements NamedListInitializedPl
             filterBuilderClassName,
             SolrFilterBuilder.class,
             null,
-            new Class[] {String.class, Analyzer.class, SolrQueryRequest.class},
-            new Object[] {defaultField, analyzer, req});
+            new Class[] {String.class, Analyzer.class, SolrQueryRequest.class, FilterBuilder.class},
+            new Object[] {defaultField, analyzer, req, this.filterFactory});
 
         this.filterFactory.addBuilder(filterName, filterBuilder);
         continue;

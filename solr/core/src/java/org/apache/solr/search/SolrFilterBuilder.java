@@ -25,7 +25,7 @@ public abstract class SolrFilterBuilder implements FilterBuilder {
   protected final SolrQueryRequest req;
 
   public SolrFilterBuilder(String defaultField, Analyzer analyzer,
-      SolrQueryRequest req) {
+      SolrQueryRequest req, FilterBuilder filterFactory) {
     this.req = req;
   }
 

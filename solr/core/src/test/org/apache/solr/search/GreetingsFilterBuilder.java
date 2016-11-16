@@ -17,6 +17,7 @@
 package org.apache.solr.search;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.queryparser.xml.FilterBuilder;
 import org.apache.lucene.queryparser.xml.ParserException;
 import org.apache.lucene.search.MatchAllDocsFilter;
 import org.apache.lucene.search.Filter;
@@ -26,8 +27,8 @@ import org.w3c.dom.Element;
 public class GreetingsFilterBuilder extends SolrFilterBuilder {
 
   public GreetingsFilterBuilder(String defaultField, Analyzer analyzer,
-      SolrQueryRequest req) {
-    super(defaultField, analyzer, req);
+      SolrQueryRequest req, FilterBuilder filterFactory) {
+    super(defaultField, analyzer, req, filterFactory);
   }
 
   @Override
