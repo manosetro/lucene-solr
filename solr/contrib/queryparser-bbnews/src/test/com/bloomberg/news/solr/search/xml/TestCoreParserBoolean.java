@@ -41,7 +41,8 @@ public class TestCoreParserBoolean extends TestCoreParser {
       super(defaultField, analyzer);
 
       // the query builder to be tested
-      queryFactory.addBuilder("BooleanQuery", new BooleanQueryBuilder(queryFactory));
+      queryFactory.addBuilder("BooleanQuery", new BooleanQueryBuilder(
+        defaultField, analyzer, null, queryFactory));
 
       // some additional builders to help
       // (here only since requiring access to queryFactory)

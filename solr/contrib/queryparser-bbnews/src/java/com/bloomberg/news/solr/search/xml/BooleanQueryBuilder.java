@@ -5,6 +5,7 @@ package com.bloomberg.news.solr.search.xml;
 
 import java.util.HashSet;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
@@ -12,6 +13,8 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.queryparser.xml.DOMUtils;
 import org.apache.lucene.queryparser.xml.ParserException;
 import org.apache.lucene.queryparser.xml.QueryBuilder;
+import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.SolrQueryBuilder;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -35,12 +38,11 @@ import org.w3c.dom.NodeList;
 /**
  * Builder for {@link BooleanQuery}
  */
-public class BooleanQueryBuilder implements QueryBuilder {
+public class BooleanQueryBuilder extends SolrQueryBuilder {
 
-  private final QueryBuilder factory;
-
-  public BooleanQueryBuilder(QueryBuilder factory) {
-    this.factory = factory;
+  public BooleanQueryBuilder(String defaultField, Analyzer analyzer,
+                             SolrQueryRequest req, QueryBuilder queryFactory) {
+    super(defaultField, analyzer, req, queryFactory);
   }
 
   /* (non-Javadoc)
@@ -66,7 +68,7 @@ public class BooleanQueryBuilder implements QueryBuilder {
         BooleanClause.Occur occurs = getOccursValue(clauseElem);
 
         Element clauseQuery = DOMUtils.getFirstChildOrFail(clauseElem);
-        Query q = factory.getQuery(clauseQuery);
+        Query q = queryFactory.getQuery(clauseQuery);
         if (q instanceof MatchAllDocsQuery) {
           matchAllDocsExists = true;
           continue;// we will add this MAD query later if necessary
