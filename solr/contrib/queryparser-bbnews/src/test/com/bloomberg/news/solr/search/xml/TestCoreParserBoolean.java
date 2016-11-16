@@ -42,7 +42,7 @@ public class TestCoreParserBoolean extends TestCoreParser {
       // the query builder to be tested
       {
         String queryName = "BooleanQuery";
-        BooleanQueryBuilder builder = new BooleanQueryBuilder(queryFactory, spanFactory);
+        BooleanQueryBuilder builder = new BooleanQueryBuilder(defaultField, analyzer, null, queryFactory, spanFactory);
         queryFactory.addBuilder(queryName, builder);
         spanFactory.addBuilder(queryName, builder);
       }
