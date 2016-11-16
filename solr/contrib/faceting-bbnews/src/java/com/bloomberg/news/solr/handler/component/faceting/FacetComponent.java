@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.bloomberg.news.solr.handler.component;
+package com.bloomberg.news.solr.handler.component.faceting;
 
 public class FacetComponent extends org.apache.solr.handler.component.FacetComponent {
     // This is a placeholder so that solrconfig.xml can reference FacetComponent.

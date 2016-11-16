@@ -58,6 +58,7 @@
         <include name="solr-solrj-${version}.jar" />
         <include name="solr-core-${version}.jar" />
         <include name="solr-analysis-bbnews-${version}.jar" />
+        <include name="solr-faceting-bbnews-${version}.jar" />
         <include name="solr-handler-bbnews-${version}.jar" />
         <include name="solr-ltr-${version}.jar" />
         <include name="solr-queryparser-bbnews-${version}.jar" />

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.bloomberg.news.solr.handler.component;
+package com.bloomberg.news.solr.handler.component.faceting;
 
 import org.apache.solr.SolrTestCaseJ4;
 import org.junit.Test;
