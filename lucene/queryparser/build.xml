@@ -43,6 +43,8 @@
   </path>
 
   <target name="compile-core" depends="jar-queries,jar-sandbox,common.compile-core"/>
+  <!-- remove this once TestBBCoreParser and TestWildParser are moved out -->
+  <target name="compile-test" depends="jar-analyzers-icu,jar-analyzers-common,jar-analyzers-kuromoji,jar-queries,jar-sandbox,common.compile-core,common.compile-test"/>
 
   <target name="javadocs" depends="javadocs-queries,javadocs-sandbox,compile-core">
     <invoke-module-javadoc>
