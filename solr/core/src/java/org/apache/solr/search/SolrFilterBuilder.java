@@ -23,10 +23,12 @@ import org.apache.solr.request.SolrQueryRequest;
 public abstract class SolrFilterBuilder implements FilterBuilder {
 
   protected final SolrQueryRequest req;
+  protected final FilterBuilder filterFactory;
 
   public SolrFilterBuilder(String defaultField, Analyzer analyzer,
       SolrQueryRequest req, FilterBuilder filterFactory) {
     this.req = req;
+    this.filterFactory = filterFactory;
   }
 
 }
