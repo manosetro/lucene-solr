@@ -4,6 +4,7 @@
 package com.bloomberg.news.solr.search.xml;
 import java.util.HashSet;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.MatchAllDocsFilter;
 import org.apache.lucene.queries.BooleanFilter;
@@ -12,6 +13,8 @@ import org.apache.lucene.queries.FilterClause;
 import org.apache.lucene.queryparser.xml.DOMUtils;
 import org.apache.lucene.queryparser.xml.FilterBuilder;
 import org.apache.lucene.queryparser.xml.ParserException;
+import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.SolrFilterBuilder;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -36,12 +39,11 @@ import org.w3c.dom.NodeList;
 /**
  * Builder for {@link BooleanFilter}
  */
-public class BooleanFilterBuilder implements FilterBuilder {
+public class BooleanFilterBuilder extends SolrFilterBuilder {
 
-  private final FilterBuilder factory;
-
-  public BooleanFilterBuilder(FilterBuilder factory) {
-    this.factory = factory;
+  public BooleanFilterBuilder(String defaultField, Analyzer analyzer,
+      SolrQueryRequest req, FilterBuilder filterFactory) {
+    super(defaultField, analyzer, req, filterFactory);
   }
 
   @Override
@@ -63,7 +65,7 @@ public class BooleanFilterBuilder implements FilterBuilder {
         BooleanClause.Occur occurs = BooleanQueryBuilder.getOccursValue(clauseElem);
 
         Element clauseFilter = DOMUtils.getFirstChildOrFail(clauseElem);
-        Filter f = factory.getFilter(clauseFilter);
+        Filter f = filterFactory.getFilter(clauseFilter);
 
         //MatchAllDocs needs to be added back only if there is no other should or must clause and there is no need to have duplicates of them.
         if (f instanceof MatchAllDocsFilter) {

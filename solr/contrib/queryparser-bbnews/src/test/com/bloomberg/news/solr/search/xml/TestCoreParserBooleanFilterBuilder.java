@@ -53,7 +53,8 @@ public class TestCoreParserBooleanFilterBuilder extends TestCoreParser {
       super(defaultField, analyzer);
 
       // the filter to be tested
-      filterFactory.addBuilder("BooleanFilter", new BooleanFilterBuilder(filterFactory));
+      filterFactory.addBuilder("BooleanFilter", new BooleanFilterBuilder(
+        defaultField, analyzer, null, filterFactory));
     }
   }
 
