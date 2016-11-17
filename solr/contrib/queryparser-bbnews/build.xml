@@ -12,10 +12,8 @@
 
   <path id="test.classpath">
     <path refid="solr.test.base.classpath"/>
-    <dirset dir="${common.dir}/build/queryparser/">
-      <include name="**/classes/java"/>
-      <include name="**/classes/test"/>
-    </dirset>
+    <pathelement path="${common.dir}/build/queryparser/classes/java"/>
+    <pathelement path="${common.dir}/build/queryparser/classes/test"/>
   </path>
 
 </project>
