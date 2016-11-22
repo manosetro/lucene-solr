@@ -87,7 +87,7 @@ public class CoreParser implements QueryBuilder {
       queryFactory.addBuilder("UserQuery", new UserInputQueryBuilder(defaultField, analyzer));
     }
     queryFactory.addBuilder("FilteredQuery", new FilteredQueryBuilder(filterFactory, queryFactory));
-    queryFactory.addBuilder("ConstantScoreQuery", new ConstantScoreQueryBuilder(queryFactory));
+    queryFactory.addBuilder("ConstantScoreQuery", new ConstantScoreQueryBuilder(queryFactory, filterFactory));
 
     filterFactory.addBuilder("CachedFilter", new CachedFilterBuilder(queryFactory,
         filterFactory, maxNumCachedFilters));

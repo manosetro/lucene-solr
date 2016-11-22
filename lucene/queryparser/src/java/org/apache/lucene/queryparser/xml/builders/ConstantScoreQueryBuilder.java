@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.xml.builders;
 
 import org.apache.lucene.queryparser.xml.DOMUtils;
+import org.apache.lucene.queryparser.xml.FilterBuilderFactory;
 import org.apache.lucene.queryparser.xml.ParserException;
 import org.apache.lucene.queryparser.xml.QueryBuilder;
 import org.apache.lucene.queryparser.xml.QueryBuilderFactory;
@@ -31,16 +32,25 @@ import org.w3c.dom.Element;
 public class ConstantScoreQueryBuilder implements QueryBuilder {
 
   private final QueryBuilderFactory queryFactory;
+  private final FilterBuilderFactory filterFactory;
 
-  public ConstantScoreQueryBuilder(QueryBuilderFactory queryFactory) {
+  public ConstantScoreQueryBuilder(QueryBuilderFactory queryFactory, FilterBuilderFactory filterFactory) {
     this.queryFactory = queryFactory;
+    this.filterFactory = filterFactory;
   }
 
   @Override
   public Query getQuery(Element e) throws ParserException {
     Element queryElem = DOMUtils.getFirstChildOrFail(e);
 
-    Query q = new ConstantScoreQuery(queryFactory.getQuery(queryElem));
+    Query innerQ;
+    try {
+      innerQ = queryFactory.getQuery(queryElem);
+    } catch (ParserException ex) {
+      innerQ = filterFactory.getFilter(queryElem);
+    }
+
+    Query q = new ConstantScoreQuery(innerQ);
     float boost = DOMUtils.getAttribute(e, "boost", 1.0f);
     if (boost != 1f) {
       q = new BoostQuery(q, boost);
