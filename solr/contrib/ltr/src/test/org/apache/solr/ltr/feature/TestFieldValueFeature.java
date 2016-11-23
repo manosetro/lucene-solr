@@ -193,7 +193,7 @@ public class TestFieldValueFeature extends TestRerankBase {
     assertJQ("/query" + query.toQueryString(),
             "/response/docs/[0]/=={'[fv]':'trendy:1.0'}");
 
-    // check default value at false
+    // check default value is false
     query = new SolrQuery();
     query.setQuery("id:2");
     query.add("rq", "{!ltr model=trendy-model reRankDocs=4}");
