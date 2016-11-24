@@ -5,6 +5,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.xml.DOMUtils;
 import org.apache.lucene.queryparser.xml.ParserException;
 import org.apache.lucene.queryparser.xml.QueryBuilder;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.solr.request.SolrQueryRequest;
@@ -54,10 +55,12 @@ public class WildcardQueryBuilder extends SolrQueryBuilder
 
         value = analyzeIfMultitermTermText(field,  value, ft);
 
-        WildcardQuery wq = null;
-        wq = new WildcardQuery(new Term(field, value));
-        wq.setBoost(DOMUtils.getAttribute(e, "boost", 1.0f));
-        return wq;
+        Query q = new WildcardQuery(new Term(field, value));
+        float boost = DOMUtils.getAttribute(e, "boost", 1.0f);
+        if (boost != 1f) {
+          q = new BoostQuery(q, boost);
+        }
+        return q;
     }
 
     // Lifted from SolrQueryParserBase

@@ -16,10 +16,14 @@ package com.bloomberg.news.solr.search.xml;
  * limitations under the License.
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.xml.DOMUtils;
 import org.apache.lucene.queryparser.xml.ParserException;
 import org.apache.lucene.queryparser.xml.QueryBuilder;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
@@ -46,13 +50,12 @@ public class DisjunctionMaxQueryBuilder extends SolrQueryBuilder {
   @Override
   public Query getQuery(Element e) throws ParserException {
     float tieBreaker = DOMUtils.getAttribute(e, "tieBreaker", 0.0f); 
-    DisjunctionMaxQuery dq = new DisjunctionMaxQuery(tieBreaker);
-    dq.setBoost(DOMUtils.getAttribute(e, "boost", 1.0f));
 
     boolean matchAllDocsExists = false;
     boolean anyOtherQueryExists = false;
     NodeList nl = e.getChildNodes();
     final int nlLen = nl.getLength();
+    Collection<Query> queries = new ArrayList<Query>(nlLen);
     for (int i = 0; i < nlLen; i++) {
       Node node = nl.item(i);
       if (node instanceof Element) { // all elements are disjuncts.
@@ -65,14 +68,21 @@ public class DisjunctionMaxQueryBuilder extends SolrQueryBuilder {
         else {
           anyOtherQueryExists = true;
         }
-        dq.add(q);
+        queries.add(q);
       }
     }
+
+    Query q = new DisjunctionMaxQuery(queries, tieBreaker);
+    float boost = DOMUtils.getAttribute(e, "boost", 1.0f);
+    if (boost != 1f) {
+      q = new BoostQuery(q, boost);
+    }
+
     //MatchallDocs query needs to be added only if there is no other queries inside the DisjunctionMaxQuery.
     //At least we preserve the users intention to execute the rest of the query. instead of flooding him with all the documents.
     if (matchAllDocsExists && !anyOtherQueryExists) 
       return new MatchAllDocsQuery();
     else
-      return dq;
+      return q;
   }
 }

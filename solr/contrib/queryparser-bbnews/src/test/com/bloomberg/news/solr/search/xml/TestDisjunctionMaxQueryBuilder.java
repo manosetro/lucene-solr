@@ -37,6 +37,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class TestDisjunctionMaxQueryBuilder extends LuceneTestCase {
 
@@ -59,8 +61,9 @@ public class TestDisjunctionMaxQueryBuilder extends LuceneTestCase {
     if (madQueryOnly) {
       expectedQuery = new MatchAllDocsQuery();
     } else {
-      final DisjunctionMaxQuery dmQuery = new DisjunctionMaxQuery(tieBreakerMultiplier);
-      dmQuery.add(new TermQuery(new Term("title", "guide")));
+      Collection<Query> queries = new ArrayList<Query>(1);
+      queries.add(new TermQuery(new Term("title", "guide")));
+      final DisjunctionMaxQuery dmQuery = new DisjunctionMaxQuery(queries, tieBreakerMultiplier);
       expectedQuery = dmQuery;
     }
 

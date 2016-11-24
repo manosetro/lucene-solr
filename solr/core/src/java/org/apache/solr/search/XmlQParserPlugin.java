@@ -37,7 +37,7 @@ public class XmlQParserPlugin extends QParserPlugin {
   private NamedList args;
 
   @Override
-  public void init(@SuppressWarnings("rawtypes") NamedList args) {
+  public void init(@SuppressWarnings("rawtypes") NamedList args ) {
     super.init(args);
     this.args = args;
   }

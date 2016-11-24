@@ -66,17 +66,11 @@ public class TermFreqBuilder implements QueryBuilder, FilterBuilder {
 
   private Filter build(Filter f, Element e) throws ParserException {
     if (f instanceof TermFilter) {
-
       return new TermFreqFilter((TermFilter)f, getTF(e));
-
     } else if (f instanceof TermsFilter) {
-
       return new TermsFreqFilter((TermsFilter)f, getTF(e));
-
     } else {
-
       throw new ParserException("Filter is of unsupported type: "+f);
-
     }
   }
 
@@ -84,26 +78,21 @@ public class TermFreqBuilder implements QueryBuilder, FilterBuilder {
     IntegerRange termFreqRange = getTF(e);
 
     if (q instanceof TermQuery) {
-
       return new TermFreqQuery((TermQuery)q, termFreqRange);
-
     } else if (q instanceof BooleanQuery) {
-
-      BooleanQuery bq = (BooleanQuery)q;
-      for (BooleanClause bc : bq.clauses()) {
+      BooleanQuery oldbq = (BooleanQuery)q;
+      BooleanQuery.Builder bq = new BooleanQuery.Builder();
+      for (BooleanClause bc : oldbq.clauses()) {
         Query subq = bc.getQuery();
         if (subq instanceof TermQuery) {
-          bc.setQuery( new TermFreqQuery((TermQuery)subq, termFreqRange) );
+          bq.add(new TermFreqQuery((TermQuery)subq, termFreqRange), bc.getOccur() );
         } else {
           throw new ParserException("Sub-Query is of unsupported type: "+subq);
         }
       }
-      return bq;
-
+      return bq.build();
     } else {
-
       throw new ParserException("Query is of unsupported type: "+q);
-
     }
   }
 

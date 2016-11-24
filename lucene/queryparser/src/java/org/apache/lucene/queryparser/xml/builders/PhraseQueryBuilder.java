@@ -4,7 +4,6 @@ import java.io.IOException;
 
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.CachingTokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute;
@@ -51,7 +50,7 @@ public class PhraseQueryBuilder implements QueryBuilder {
                 "fieldName");
         String phrase = DOMUtils.getNonBlankTextOrFail(e);
 
-        PhraseQuery pq = new PhraseQuery();
+        PhraseQuery.Builder pqb = new PhraseQuery.Builder();
 
         TokenStream source = null;
         try {
@@ -75,7 +74,7 @@ public class PhraseQueryBuilder implements QueryBuilder {
             while (source.incrementToken()) {
               int positionIncrement = (posIncrAtt != null) ? posIncrAtt.getPositionIncrement() : 1;
               position += positionIncrement;
-              pq.add(new Term(field, BytesRef.deepCopyOf(termAtt.getBytesRef())), position);
+              pqb.add(new Term(field, BytesRef.deepCopyOf(termAtt.getBytesRef())), position);
             }
 
             source.end();
@@ -88,14 +87,15 @@ public class PhraseQueryBuilder implements QueryBuilder {
         } finally {
             IOUtils.closeWhileHandlingException(source);
         }
-        
-        if(pq.isEmpty())
+
+        // TODO pqb.setSlop(phraseSlop);
+        PhraseQuery pq = pqb.build();
+        if(pq.getTerms().length == 0)
         {
           throw new ParserException("Empty phrase query generated for field:" + field
                             + ", phrase:" + phrase);
         }
 
-        // TODO pq.setSlop(phraseSlop);
         float boost = DOMUtils.getAttribute(e, "boost", 1.0f);
         if (boost != 1f) {
           return new BoostQuery(pq, boost);
