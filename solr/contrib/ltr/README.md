@@ -24,34 +24,13 @@ the techproducts example please follow these steps.
 
    `./bin/solr -e techproducts`
 
-3. Stop solr and install the plugin:
-     1. Stop solr
-
-        `./bin/solr stop`
-     2. Create the lib folder
-
-        `mkdir example/techproducts/solr/techproducts/lib`
-     3. Install the plugin in the lib folder
-
-        `cp build/contrib/ltr/solr-ltr-7.0.0-SNAPSHOT.jar example/techproducts/solr/techproducts/lib/`
-     4. Replace the original solrconfig with one importing all the ltr components
-
-        `cp contrib/ltr/example/solrconfig.xml example/techproducts/solr/techproducts/conf/`
-
-4. Run the example again
-
-   `./bin/solr -e techproducts`
-
-   Note you could also have just restarted your collection using the admin page.
-   You can find more detailed instructions [here](https://wiki.apache.org/solr/SolrPlugins).
-
-5. Deploy features and a model
+3. Deploy features and a model
 
       `curl -XPUT 'http://localhost:8983/solr/techproducts/schema/feature-store'  --data-binary "@./contrib/ltr/example/techproducts-features.json"  -H 'Content-type:application/json'`
 
       `curl -XPUT 'http://localhost:8983/solr/techproducts/schema/model-store'  --data-binary "@./contrib/ltr/example/techproducts-model.json"  -H 'Content-type:application/json'`
 
-6. Have fun !
+4. Have fun !
 
      * Access to the default feature store
 

@@ -84,6 +84,10 @@
   <lib dir="${solr.install.dir:../../../..}/contrib/velocity/lib" regex=".*\.jar" />
   <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-velocity-\d.*\.jar" />
 
+
+  <lib dir="${solr.install.dir:../../../..}/contrib/ltr/lib/" regex=".*\.jar" />
+  <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-ltr-\d.*\.jar" />
+
   <!-- an exact 'path' can be used instead of a 'dir' to specify a 
        specific jar file.  This will cause a serious error to be logged 
        if it can't be loaded.
@@ -1597,8 +1601,17 @@
      <valueSourceParser name="myfunc" 
                         class="com.mycompany.MyValueSourceParser" />
     -->
-    
-  
+  <!-- Learning to rank query parser
+
+  http://wiki.apache.org/solr/FIXME
+
+       Query parser used to rerank top docs with a provided  model
+   -->
+       <queryParser name="ltr" class="org.apache.solr.ltr.search.LTRQParserPlugin" >
+           <int name="threadModule.totalPoolThreads">10</int> <!-- Maximum threads to use for all queries -->
+           <int name="threadModule.numThreadsPerRequest">10</int> <!-- Maximum threads to use for a single query-->
+       </queryParser>
+
   <!-- Document Transformers
        http://wiki.apache.org/solr/DocTransformers
     -->
@@ -1622,5 +1635,12 @@
       EditorialMarkerFactory will do exactly that:
      <transformer name="qecBooster" class="org.apache.solr.response.transform.EditorialMarkerFactory" />
     -->
-    
+    <!--
+      LTR Transformer will encode the document features in the response. For each document the transformer
+      will add the features as an extra field in the response. The name of the field we will be the
+      name of the transformer enclosed between brackets (in this case [features]).
+      In order to get the feature vector you will have to specify that you
+      want the field (e.g., fl="*,[features])
+   -->
+        <transformer name="features" class="org.apache.solr.ltr.response.transform.LTRFeatureLoggerTransformerFactory" />
 </config>
