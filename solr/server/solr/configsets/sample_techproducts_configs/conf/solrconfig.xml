@@ -1607,7 +1607,8 @@
 
        Query parser used to rerank top docs with a provided  model
    -->
-       <queryParser name="ltr" class="org.apache.solr.ltr.search.LTRQParserPlugin" >
+       <queryParser enable="${solr.ltr.enabled:false}"
+name="ltr" class="org.apache.solr.ltr.search.LTRQParserPlugin" >
            <int name="threadModule.totalPoolThreads">10</int> <!-- Maximum threads to use for all queries -->
            <int name="threadModule.numThreadsPerRequest">10</int> <!-- Maximum threads to use for a single query-->
        </queryParser>
@@ -1642,5 +1643,6 @@
       In order to get the feature vector you will have to specify that you
       want the field (e.g., fl="*,[features])
    -->
-        <transformer name="features" class="org.apache.solr.ltr.response.transform.LTRFeatureLoggerTransformerFactory" />
+        <transformer enable="${solr.ltr.enabled:false}"
+name="features" class="org.apache.solr.ltr.response.transform.LTRFeatureLoggerTransformerFactory" />
 </config>

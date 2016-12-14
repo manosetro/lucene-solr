@@ -20,9 +20,9 @@ the techproducts example please follow these steps.
     `ant dist`
     `ant server`
 
-2. Run the example to setup the index
+2. Run the example to setup the index, enabling the ltr plugin
 
-   `./bin/solr -e techproducts`
+   `./bin/solr -e techproducts -Dsolr.ltr.enabled=true`
 
 3. Deploy features and a model
 
