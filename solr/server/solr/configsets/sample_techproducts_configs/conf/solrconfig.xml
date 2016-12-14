@@ -81,12 +81,12 @@
   <lib dir="${solr.install.dir:../../../..}/contrib/langid/lib/" regex=".*\.jar" />
   <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-langid-\d.*\.jar" />
 
+  <lib dir="${solr.install.dir:../../../..}/contrib/ltr/lib/" regex=".*\.jar" />
+  <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-ltr-\d.*\.jar" />
+
   <lib dir="${solr.install.dir:../../../..}/contrib/velocity/lib" regex=".*\.jar" />
   <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-velocity-\d.*\.jar" />
 
-
-  <lib dir="${solr.install.dir:../../../..}/contrib/ltr/lib/" regex=".*\.jar" />
-  <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-ltr-\d.*\.jar" />
 
   <!-- an exact 'path' can be used instead of a 'dir' to specify a 
        specific jar file.  This will cause a serious error to be logged 
@@ -1601,16 +1601,17 @@
      <valueSourceParser name="myfunc" 
                         class="com.mycompany.MyValueSourceParser" />
     -->
-  <!-- Learning to rank query parser
+  <!--  LTR query parser: You will need to set the solr.ltr.enabled system property
+        when running solr to run with ltr enabled:
 
-  http://wiki.apache.org/solr/FIXME
+              -Dsolr.ltr.enabled=true
 
-       Query parser used to rerank top docs with a provided  model
+       https://cwiki.apache.org/confluence/display/solr/Result+Reranking
+
+       Query parser is used to rerank top docs with a provided  model
    -->
        <queryParser enable="${solr.ltr.enabled:false}"
 name="ltr" class="org.apache.solr.ltr.search.LTRQParserPlugin" >
-           <int name="threadModule.totalPoolThreads">10</int> <!-- Maximum threads to use for all queries -->
-           <int name="threadModule.numThreadsPerRequest">10</int> <!-- Maximum threads to use for a single query-->
        </queryParser>
 
   <!-- Document Transformers

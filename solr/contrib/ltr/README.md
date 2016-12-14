@@ -13,6 +13,8 @@ deploy that model to Solr and use it to rerank your top X search results.
 
 Solr provides some simple example of indices. In order to test the plugin with
 the techproducts example please follow these steps.
+If you want to install the plugin on your instance of Solr, please refer
+to the [Solr Ref Guide](https://cwiki.apache.org/confluence/display/solr/Result+Reranking).
 
 1. Compile solr and the examples
 
@@ -20,7 +22,7 @@ the techproducts example please follow these steps.
     `ant dist`
     `ant server`
 
-2. Run the example to setup the index, enabling the ltr plugin
+2. Run the example to setup the index, enabling the ltr plugin 
 
    `./bin/solr -e techproducts -Dsolr.ltr.enabled=true`
 
