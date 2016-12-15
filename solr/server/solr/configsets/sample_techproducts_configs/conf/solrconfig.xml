@@ -1656,7 +1656,7 @@
 
     <!--
       LTR Transformer will encode the document features in the response. For each document the transformer
-      will add the features as an extra field in the response. The name of the field we will be the
+      will add the features as an extra field in the response. The name of the field will be the
       name of the transformer enclosed between brackets (in this case [features]).
       In order to get the feature vector you will have to specify that you
       want the field (e.g., fl="*,[features])
