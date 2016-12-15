@@ -34,6 +34,7 @@ import org.apache.solr.schema.*;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.ReturnFields;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.util.RTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,40 +137,49 @@ public class BinaryResponseWriter implements BinaryQueryResponseWriter {
       context.wantsScores = returnFields.wantsScore() && ids.hasScores();
       context.req = solrQueryRequest;
       context.searcher = searcher;
-      if( transformer != null ) {
+      final RTimer timer = (transformer != null) ? solrQueryRequest.getRequestTimer().sub("transformer") : null;
+      if (timer != null){
+        timer.pause();
+      }
+      if(transformer != null) {
         transformer.setContext( context );
       }
-      
       Set<String> fnames = returnFields.getLuceneFieldNames();
       context.iterator = ids.iterator();
       for (int i = 0; i < sz; i++) {
         int id = context.iterator.nextDoc();
         Document doc = searcher.doc(id, fnames);
         SolrDocument sdoc = getDoc(doc);
-        if( transformer != null ) {
+        if (timer != null) {
+          timer.resume();
+        }
+        if(transformer != null) {
           transformer.transform(sdoc, id);
+        }
+        if (timer != null) {
+          timer.pause();
         }
         codec.writeSolrDocument(sdoc);
       }
-      if( transformer != null ) {
+      if(transformer != null) {
         transformer.setContext( null );
       }
     }
-    
+
     public void writeResults(ResultContext ctx, JavaBinCodec codec) throws IOException {
       codec.writeTag(JavaBinCodec.SOLRDOCLST);
       boolean wantsScores = returnFields.wantsScore() && ctx.docs.hasScores();
       List l = new ArrayList(3);
       l.add((long) ctx.docs.matches());
       l.add((long) ctx.docs.offset());
-      
+
       Float maxScore = null;
       if (wantsScores) {
         maxScore = ctx.docs.maxScore();
       }
       l.add(maxScore);
       codec.writeArray(l);
-      
+
       // this is a seprate function so that streaming responses can use just that part
       writeResultsBody( ctx, codec );
     }

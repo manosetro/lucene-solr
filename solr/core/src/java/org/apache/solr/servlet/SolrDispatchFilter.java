@@ -66,6 +66,8 @@ import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.BinaryQueryResponseWriter;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.response.transform.DocTransformer;
+import org.apache.solr.search.ReturnFields;
 import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;
 import org.apache.solr.servlet.cache.Method;
 import org.apache.solr.update.processor.DistributingUpdateProcessorFactory;
@@ -774,6 +776,16 @@ public class SolrDispatchFilter extends BaseSolrFilter {
       log.info("Unable to write response: req={} rsp={}", solrReq, solrRsp, e);
       throw e;
     }
+
+    if (log.isInfoEnabled() && solrReq.getRequestTimer().hasTimer("transformer")){
+      final RTimer timer = solrReq.getRequestTimer().sub("transformer");
+      final ReturnFields rf = solrRsp.getReturnFields();
+      final DocTransformer dt = rf.getTransformer();
+      final long transformersTime = (long)timer.getTime();
+      solrRsp.getToLog().add("TransformerName", dt.getName());
+      solrRsp.getToLog().add("TransformerTime", transformersTime);
+      log.info(solrRsp.getToLogAsString(solrReq.getCore().getLogId()));
+    }
   }
 
   private void addAttributeFromServletRequest( final String attributeName, HttpServletRequest req, SolrQueryRequest sreq) {
@@ -782,7 +794,7 @@ public class SolrDispatchFilter extends BaseSolrFilter {
         sreq.getContext().put( attributeName, attributeValue );
     }
   }
-  
+
   protected void execute( HttpServletRequest req, SolrRequestHandler handler, SolrQueryRequest sreq, SolrQueryResponse rsp) {
     // a custom filter could add more stuff to the request before passing it on.
     // for example: sreq.getContext().put( "HttpServletRequest", req );

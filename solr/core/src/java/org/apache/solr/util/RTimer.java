@@ -122,6 +122,10 @@ public class RTimer {
   public void setSubTimer(String desc, Double value) {
     double_children.add(desc, value);
   }
+  
+  public boolean hasTimer(String desc){
+    return ((children.indexOf(desc, 0) >= 0) || (double_children.indexOf(desc, 0) >= 0));
+  }
 
   public NamedList asNamedList() {
     NamedList<Object> m = new SimpleOrderedMap<>();

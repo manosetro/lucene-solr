@@ -273,14 +273,15 @@ public abstract class TextResponseWriter {
     context.searcher = req.getSearcher();
     context.iterator = ids.iterator();
 
-    final boolean enableTransformerTimer = transformer != null;
-    final RTimer timer = (enableTransformerTimer) ? req.getRequestTimer().sub("transformer") : null;
+    final RTimer timer = (transformer!=null) ? req.getRequestTimer().sub("transformer") : null;
+    if (timer != null){
+      timer.pause();
+    }
+
     if (transformer != null) {
       transformer.setContext( context );
     }
-    if (enableTransformerTimer){
-      timer.pause();
-    }
+
     int sz = ids.size();
     Set<String> fnames = fields.getLuceneFieldNames();
     for (int i=0; i<sz; i++) {
@@ -288,11 +289,11 @@ public abstract class TextResponseWriter {
       Document doc = context.searcher.doc(id, fnames);
       SolrDocument sdoc = toSolrDocument( doc );
       if (transformer != null) {
-        if (enableTransformerTimer) {
+        if (timer != null) {
           timer.resume();
         }
         transformer.transform( sdoc, id);
-        if (enableTransformerTimer) {
+        if (timer != null) {
           timer.pause();
         }
       }
@@ -300,7 +301,7 @@ public abstract class TextResponseWriter {
     }
 
     if(transformer != null) {
-      if (enableTransformerTimer){
+      if (timer != null){
         timer.stop();
       }
       transformer.setContext( null );
