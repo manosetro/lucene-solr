@@ -17,6 +17,7 @@
 package org.apache.solr.ltr.response.transform;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,8 @@ import org.apache.solr.response.transform.DocTransformer;
 import org.apache.solr.response.transform.TransformerFactory;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.SolrPluginUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This transformer will take care to generate and append in the response the
@@ -61,6 +64,8 @@ import org.apache.solr.util.SolrPluginUtils;
 
 public class LTRFeatureLoggerTransformerFactory extends TransformerFactory {
 
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   // used inside fl to specify the output format (csv/json) of the extracted features
   private static final String FV_RESPONSE_WRITER = "fvwt";
 
@@ -73,9 +78,11 @@ public class LTRFeatureLoggerTransformerFactory extends TransformerFactory {
   private static String DEFAULT_LOGGING_MODEL_NAME = "logging-model";
 
   private String loggingModelName = DEFAULT_LOGGING_MODEL_NAME;
-  private String defaultFvStore;
+  private String defaultStore;
   private String defaultFvwt;
-  private String defaultFvFormat;
+  private String defaultFormat;
+  private char csvKeyValueDelimiter = FeatureLogger.CSVFeatureLogger.DEFAULT_KEY_VALUE_SEPARATOR;
+  private char csvFeatureSeparator = FeatureLogger.CSVFeatureLogger.DEFAULT_FEATURE_SEPARATOR;
 
   private LTRThreadModule threadManager = null;
 
@@ -83,16 +90,30 @@ public class LTRFeatureLoggerTransformerFactory extends TransformerFactory {
     this.loggingModelName = loggingModelName;
   }
 
-  public void setStore(String defaultFvStore) {
-    this.defaultFvStore = defaultFvStore;
+  public void setDefaultStore(String defaultStore) {
+    this.defaultStore = defaultStore;
   }
 
-  public void setFvwt(String defaultFvwt) {
+  public void setDefaultFvwt(String defaultFvwt) {
     this.defaultFvwt = defaultFvwt;
   }
 
-  public void setFormat(String defaultFvFormat) {
-    this.defaultFvFormat = defaultFvFormat;
+  public void setDefaultFormat(String defaultFormat) {
+    this.defaultFormat = defaultFormat;
+  }
+
+  public void setCsvKeyValueDelimiter(String csvKeyValueDelimiter) {
+    if (csvKeyValueDelimiter.length() != 1) {
+      throw new IllegalArgumentException("csvKeyValueDelimiter must be exactly 1 character");
+    }
+    this.csvKeyValueDelimiter = csvKeyValueDelimiter.charAt(0);
+  }
+
+  public void setCsvFeatureSeparator(String csvFeatureSeparator) {
+    if (csvFeatureSeparator.length() != 1) {
+      throw new IllegalArgumentException("csvFeatureSeparator must be exactly 1 character");
+    }
+    this.csvFeatureSeparator = csvFeatureSeparator.charAt(0);
   }
 
   @Override
@@ -110,15 +131,54 @@ public class LTRFeatureLoggerTransformerFactory extends TransformerFactory {
     SolrQueryRequestContextUtils.setIsExtractingFeatures(req);
 
     // Communicate which feature store we are requesting features for
-    SolrQueryRequestContextUtils.setFvStoreName(req, localparams.get(FV_STORE, defaultFvStore));
+    SolrQueryRequestContextUtils.setFvStoreName(req, localparams.get(FV_STORE, defaultStore));
 
     // Create and supply the feature logger to be used
     SolrQueryRequestContextUtils.setFeatureLogger(req,
-        FeatureLogger.createFeatureLogger(
+        createFeatureLogger(
             localparams.get(FV_RESPONSE_WRITER, defaultFvwt),
-            localparams.get(FV_FORMAT, defaultFvFormat)));
+            localparams.get(FV_FORMAT, defaultFormat)));
 
     return new FeatureTransformer(name, localparams, req);
+  }
+
+  /**
+   * returns a FeatureLogger that logs the features in output, using the format
+   * specified in the 'stringFormat' param: 'csv' will log the features as a unique
+   * string in csv format 'json' will log the features in a map in a Map of
+   * featureName keys to featureValue values if format is null or empty, csv
+   * format will be selected.
+   * 'featureFormat' param: 'dense' will write features in dense format,
+   * 'sparse' will write the features in sparse format, null or empty will
+   * default to 'sparse'
+   *
+   *
+   * @return a feature logger for the format specified.
+   */
+  private FeatureLogger<?> createFeatureLogger(String stringFormat, String featureFormat) {
+    final FeatureLogger.FeatureFormat f;
+    if (featureFormat == null || featureFormat.isEmpty() ||
+        featureFormat.equals("sparse")) {
+      f = FeatureLogger.FeatureFormat.SPARSE;
+    }
+    else if (featureFormat.equals("dense")) {
+      f = FeatureLogger.FeatureFormat.DENSE;
+    }
+    else {
+      f = FeatureLogger.FeatureFormat.SPARSE;
+      log.warn("unknown feature logger feature format {} | {}", stringFormat, featureFormat);
+    }
+    if ((stringFormat == null) || stringFormat.isEmpty()) {
+      return new FeatureLogger.CSVFeatureLogger(f, csvKeyValueDelimiter, csvFeatureSeparator);
+    }
+    if (stringFormat.equals("csv")) {
+      return new FeatureLogger.CSVFeatureLogger(f, csvKeyValueDelimiter, csvFeatureSeparator);
+    }
+    if (stringFormat.equals("json")) {
+      return new FeatureLogger.MapFeatureLogger(f);
+    }
+    log.warn("unknown feature logger string format {} | {}", stringFormat, featureFormat);
+    return null;
   }
 
   class FeatureTransformer extends DocTransformer {
