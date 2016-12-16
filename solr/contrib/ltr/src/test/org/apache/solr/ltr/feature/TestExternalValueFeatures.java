@@ -17,6 +17,7 @@
 package org.apache.solr.ltr.feature;
 
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.ltr.FeatureLoggerTestUtils;
 import org.apache.solr.ltr.TestRerankBase;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -60,7 +61,7 @@ public class TestExternalValueFeatures extends TestRerankBase {
 
     assertJQ("/query" + query.toQueryString(), "/response/docs/[0]/id=='1'");
     assertJQ("/query" + query.toQueryString(),
-        "/response/docs/[0]/features=='user_device_tablet:1.0'");
+        "/response/docs/[0]/features=='"+FeatureLoggerTestUtils.toFeatureVector("user_device_tablet","1.0")+"'");
     assertJQ("/query" + query.toQueryString(),
         "/response/docs/[0]/score==65.0");
   }
