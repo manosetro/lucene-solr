@@ -16,14 +16,11 @@
  */
 package org.apache.solr.ltr;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.solr.search.SolrIndexSearcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * FeatureLogger can be registered in a model and provide a strategy for logging
@@ -31,12 +28,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class FeatureLogger<FV_TYPE> {
 
-  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
   /** the name of the cache using for storing the feature value **/
   private static final String QUERY_FV_CACHE_NAME = "QUERY_DOC_FV";
 
-  protected enum FeatureFormat {DENSE, SPARSE};
+  public enum FeatureFormat {DENSE, SPARSE};
   protected final FeatureFormat featureFormat;
 
   protected FeatureLogger(FeatureFormat f) {
@@ -65,46 +60,6 @@ public abstract class FeatureLogger<FV_TYPE> {
 
     return searcher.cacheInsert(QUERY_FV_CACHE_NAME,
         fvCacheKey(scoringQuery, docid), featureVector) != null;
-  }
-
-  /**
-   * returns a FeatureLogger that logs the features in output, using the format
-   * specified in the 'stringFormat' param: 'csv' will log the features as a unique
-   * string in csv format 'json' will log the features in a map in a Map of
-   * featureName keys to featureValue values if format is null or empty, csv
-   * format will be selected.
-   * 'featureFormat' param: 'dense' will write features in dense format,
-   * 'sparse' will write the features in sparse format, null or empty will
-   * default to 'sparse'
-   *
-   *
-   * @return a feature logger for the format specified.
-   */
-  public static FeatureLogger<?> createFeatureLogger(String stringFormat, String featureFormat) {
-    final FeatureFormat f;
-    if (featureFormat == null || featureFormat.isEmpty() ||
-        featureFormat.equals("sparse")) {
-      f = FeatureFormat.SPARSE;
-    }
-    else if (featureFormat.equals("dense")) {
-      f = FeatureFormat.DENSE;
-    }
-    else {
-      f = FeatureFormat.SPARSE;
-      log.warn("unknown feature logger feature format {} | {}", stringFormat, featureFormat);
-    }
-    if ((stringFormat == null) || stringFormat.isEmpty()) {
-      return new CSVFeatureLogger(f);
-    }
-    if (stringFormat.equals("csv")) {
-      return new CSVFeatureLogger(f);
-    }
-    if (stringFormat.equals("json")) {
-      return new MapFeatureLogger(f);
-    }
-    log.warn("unknown feature logger string format {} | {}", stringFormat, featureFormat);
-    return null;
-
   }
 
   public abstract FV_TYPE makeFeatureVector(LTRScoringQuery.FeatureInfo[] featuresInfo);
@@ -151,23 +106,21 @@ public abstract class FeatureLogger<FV_TYPE> {
   }
 
   public static class CSVFeatureLogger extends FeatureLogger<String> {
-    static final char DEFAULT_KEY_VALUE_SEPARATOR = '=';
-    static final char DEFAULT_FEATURE_SEPARATOR = ',';
-    char keyValueSep = DEFAULT_KEY_VALUE_SEPARATOR;
-    char featureSep = DEFAULT_FEATURE_SEPARATOR;
+    public static final char DEFAULT_KEY_VALUE_SEPARATOR = '=';
+    public static final char DEFAULT_FEATURE_SEPARATOR = ',';
+    private final char keyValueSep;
+    private final char featureSep;
 
     public CSVFeatureLogger(FeatureFormat f) {
       super(f);
+      this.keyValueSep = DEFAULT_KEY_VALUE_SEPARATOR;
+      this.featureSep = DEFAULT_FEATURE_SEPARATOR;
     }
 
-    public CSVFeatureLogger setKeyValueSep(char keyValueSep) {
+    public CSVFeatureLogger(FeatureFormat f, char keyValueSep, char featureSep) {
+      super(f);
       this.keyValueSep = keyValueSep;
-      return this;
-    }
-
-    public CSVFeatureLogger setFeatureSep(char featureSep) {
       this.featureSep = featureSep;
-      return this;
     }
 
     @Override
