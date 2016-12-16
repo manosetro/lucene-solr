@@ -28,6 +28,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.ltr.CSVFeatureLogger;
 import org.apache.solr.ltr.FeatureLogger;
 import org.apache.solr.ltr.LTRRescorer;
 import org.apache.solr.ltr.LTRScoringQuery;
@@ -73,13 +74,18 @@ public class LTRFeatureLoggerTransformerFactory extends TransformerFactory {
 
   private static String DEFAULT_LOGGING_MODEL_NAME = "logging-model";
 
+  private String fvCacheName;
   private String loggingModelName = DEFAULT_LOGGING_MODEL_NAME;
   private String defaultStore;
   private String defaultFormat;
-  private char csvKeyValueDelimiter = FeatureLogger.CSVFeatureLogger.DEFAULT_KEY_VALUE_SEPARATOR;
-  private char csvFeatureSeparator = FeatureLogger.CSVFeatureLogger.DEFAULT_FEATURE_SEPARATOR;
+  private char csvKeyValueDelimiter = CSVFeatureLogger.DEFAULT_KEY_VALUE_SEPARATOR;
+  private char csvFeatureSeparator = CSVFeatureLogger.DEFAULT_FEATURE_SEPARATOR;
 
   private LTRThreadModule threadManager = null;
+
+  public void setFvCacheName(String fvCacheName) {
+    this.fvCacheName = fvCacheName;
+  }
 
   public void setLoggingModelName(String loggingModelName) {
     this.loggingModelName = loggingModelName;
@@ -154,7 +160,10 @@ public class LTRFeatureLoggerTransformerFactory extends TransformerFactory {
       f = FeatureLogger.FeatureFormat.SPARSE;
       log.warn("unknown feature logger feature format {}", featureFormat);
     }
-    return new FeatureLogger.CSVFeatureLogger(f, csvKeyValueDelimiter, csvFeatureSeparator);
+    if (fvCacheName == null) {
+      throw new IllegalArgumentException("a fvCacheName must be configured");
+    }
+    return new CSVFeatureLogger(fvCacheName, f, csvKeyValueDelimiter, csvFeatureSeparator);
   }
 
   class FeatureTransformer extends DocTransformer {
