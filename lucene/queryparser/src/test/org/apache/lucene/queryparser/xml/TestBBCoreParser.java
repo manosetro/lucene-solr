@@ -166,24 +166,6 @@ public class TestBBCoreParser extends TestCoreParser {
     dumpResults("TermsFilter with all stop words", q, 5);
   }
   
-  public void testPhraseQueryXML() throws Exception {
-    Query q = parse("BBPhraseQuery.xml");
-    assertTrue("Expecting a PhraseQuery, but resulted in " + q.getClass(), q instanceof PhraseQuery);
-    dumpResults("PhraseQuery", q, 5);
-  }
-  
-  public void testPhraseQueryXMLWithStopwordsXML() throws Exception {
-    if (analyzer() instanceof StandardAnalyzer) {
-      parseShouldFail("BBPhraseQueryStopwords.xml",
-          "Empty phrase query generated for field:contents, phrase:and to a");
-    }
-  }
-  
-  public void testPhraseQueryXMLWithNoTextXML() throws Exception {
-    parseShouldFail("BBPhraseQueryEmpty.xml",
-        "PhraseQuery has no text");
-  }
-
   public void testGenericTextQueryXML() throws Exception {
     Query q = parse("BBGenericTextQuery.xml");
     assertTrue("Expecting a PhraseQuery, but resulted in " + q.getClass(), q instanceof PhraseQuery);
