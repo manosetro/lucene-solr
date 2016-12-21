@@ -77,7 +77,7 @@ public class LTRFeatureLoggerTransformerFactory extends TransformerFactory {
   private String fvCacheName;
   private String loggingModelName = DEFAULT_LOGGING_MODEL_NAME;
   private String defaultStore;
-  private String defaultFormat;
+  private FeatureLogger.FeatureFormat defaultFormat = FeatureLogger.FeatureFormat.SPARSE;
   private char csvKeyValueDelimiter = CSVFeatureLogger.DEFAULT_KEY_VALUE_SEPARATOR;
   private char csvFeatureSeparator = CSVFeatureLogger.DEFAULT_FEATURE_SEPARATOR;
 
@@ -96,7 +96,10 @@ public class LTRFeatureLoggerTransformerFactory extends TransformerFactory {
   }
 
   public void setDefaultFormat(String defaultFormat) {
-    this.defaultFormat = defaultFormat;
+    this.defaultFormat = getFeatureFormat(defaultFormat);
+    if (this.defaultFormat == null) {
+      throw new IllegalArgumentException("unsupported feature format: "+defaultFormat);
+    }
   }
 
   public void setCsvKeyValueDelimiter(String csvKeyValueDelimiter) {
@@ -133,7 +136,7 @@ public class LTRFeatureLoggerTransformerFactory extends TransformerFactory {
     // Create and supply the feature logger to be used
     SolrQueryRequestContextUtils.setFeatureLogger(req,
         createFeatureLogger(
-            localparams.get(FV_FORMAT, defaultFormat)));
+            localparams.get(FV_FORMAT)));
 
     return new FeatureTransformer(name, localparams, req);
   }
@@ -147,23 +150,30 @@ public class LTRFeatureLoggerTransformerFactory extends TransformerFactory {
    *
    * @return a feature logger for the format specified.
    */
-  private FeatureLogger createFeatureLogger(String featureFormat) {
-    final FeatureLogger.FeatureFormat f;
-    if (featureFormat == null || featureFormat.isEmpty() ||
-        featureFormat.equals("sparse")) {
-      f = FeatureLogger.FeatureFormat.SPARSE;
-    }
-    else if (featureFormat.equals("dense")) {
-      f = FeatureLogger.FeatureFormat.DENSE;
-    }
-    else {
-      f = FeatureLogger.FeatureFormat.SPARSE;
-      log.warn("unknown feature logger feature format {}", featureFormat);
+  private FeatureLogger createFeatureLogger(String formatStr) {
+    final FeatureLogger.FeatureFormat format;
+    if (formatStr != null) {
+     format = getFeatureFormat(formatStr);
+     if (format == null) {
+       throw new IllegalArgumentException("unsupported feature format: "+format);
+     }
+    } else {
+      format = this.defaultFormat;
     }
     if (fvCacheName == null) {
       throw new IllegalArgumentException("a fvCacheName must be configured");
     }
-    return new CSVFeatureLogger(fvCacheName, f, csvKeyValueDelimiter, csvFeatureSeparator);
+    return new CSVFeatureLogger(fvCacheName, format, csvKeyValueDelimiter, csvFeatureSeparator);
+  }
+
+  private static FeatureLogger.FeatureFormat getFeatureFormat(String featureFormat) {
+    if (featureFormat.equals("sparse")) {
+      return FeatureLogger.FeatureFormat.SPARSE;
+    } else if (featureFormat.equals("dense")) {
+      return  FeatureLogger.FeatureFormat.DENSE;
+    } else {
+      return null;
+    }
   }
 
   class FeatureTransformer extends DocTransformer {
