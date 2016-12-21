@@ -185,68 +185,68 @@ public class TestBBCoreParser extends TestCoreParser {
   }
 
   public void testGenericTextQueryXML() throws Exception {
-    Query q = parse("GenericTextQuery.xml");
+    Query q = parse("BBGenericTextQuery.xml");
     assertTrue("Expecting a PhraseQuery, but resulted in " + q.getClass(), q instanceof PhraseQuery);
     dumpResults("GenericTextQuery", q, 5);
   }
   
   public void testGenericTextQuerySingleTermXML() throws Exception {
-    Query q = parse("GenericTextQuerySingleTerm.xml");
+    Query q = parse("BBGenericTextQuerySingleTerm.xml");
     assertTrue("Expecting a TermQuery, but resulted in " + q.getClass(), q instanceof TermQuery);
     dumpResults("GenericTextQuery", q, 5);
   }
   
   public void testGenericTextQueryWithStopwordsXML() throws Exception {
-    Query q = parse("GenericTextQueryStopwords.xml");
+    Query q = parse("BBGenericTextQueryStopwords.xml");
     assertTrue("Expecting a PhraseQuery, but resulted in " + q.getClass(), q instanceof PhraseQuery);
     dumpResults("GenericTextQuery with stopwords", q, 5);
   }
   
   public void testGenericTextQueryWithAllStopwordsXML() throws Exception {
-    Query q = parse("GenericTextQueryAllStopwords.xml");
+    Query q = parse("BBGenericTextQueryAllStopwords.xml");
     if (analyzer() instanceof StandardAnalyzer)
       assertTrue("Expecting a MatchAllDocsQuery, but resulted in " + q.getClass(), q instanceof MatchAllDocsQuery);
     dumpResults("GenericTextQuery with just stopwords", q, 5);
   }
   
   public void testGenericTextQueryWithNoTextXML() throws Exception {
-    Query q = parse("GenericTextQueryEmpty.xml");
+    Query q = parse("BBGenericTextQueryEmpty.xml");
     assertTrue("Expecting a MatchAllDocsQuery, but resulted in " + q.getClass(), q instanceof MatchAllDocsQuery);
     dumpResults("GenericTextQuery with no text", q, 5);
   }
   
   public void testGenericTextQueryPhraseWildcardXML() throws Exception {
-    Query q = parse("GenericTextQueryPhraseWildcard.xml");
+    Query q = parse("BBGenericTextQueryPhraseWildcard.xml");
     dumpResults("GenericTextQuery with a phrase wildcard", q, 5);
   }
   
   public void testGenericTextQueryTrailingWildcardXML() throws Exception {
-    Query q = parse("GenericTextQueryTrailingWildcard.xml");
+    Query q = parse("BBGenericTextQueryTrailingWildcard.xml");
     dumpResults("GenericTextQuery with a trailing wildcard", q, 5);
   }
 
   public void testGenericTextQueryMultiWildcardXML() throws Exception {
-    Query q = parse("GenericTextQueryMultiWildcard.xml");
+    Query q = parse("BBGenericTextQueryMultiWildcard.xml");
     dumpResults("GenericTextQuery with multiple terms containing wildcards", q, 5);
   }
   
   public void testGenericTextQueryPhraseWildcard2XML() throws Exception {
-    Query q = parse("GenericTextQueryPhraseWildcard2.xml");
+    Query q = parse("BBGenericTextQueryPhraseWildcard2.xml");
     dumpResults("GenericTextQuery with a phrase wildcard", q, 5);
   }
   
   public void testGenericTextQueryTrailingWildcard2XML() throws Exception {
-    Query q = parse("GenericTextQueryTrailingWildcard2.xml");
+    Query q = parse("BBGenericTextQueryTrailingWildcard2.xml");
     dumpResults("GenericTextQuery with a trailing wildcard", q, 5);
   }
 
   public void testGenericTextQueryMultiWildcard2XML() throws Exception {
-    Query q = parse("GenericTextQueryMultiWildcard2.xml");
+    Query q = parse("BBGenericTextQueryMultiWildcard2.xml");
     dumpResults("GenericTextQuery with multiple terms containing wildcards", q, 5);
   }
 
   public void testGenericTextQueryMultiClauseXML() throws Exception {
-    Query q = parse("GenericTextQueryMultiClause.xml");
+    Query q = parse("BBGenericTextQueryMultiClause.xml");
     dumpResults("GenericTextQuery. BooleanQuery containing multiple GenericTextQuery clauses with different boost factors", q, 5);
   }
 
@@ -326,7 +326,7 @@ public class TestBBCoreParser extends TestCoreParser {
     final int maxClauseCount = BooleanQuery.getMaxClauseCount();
     try {
       BooleanQuery.setMaxClauseCount(3);
-      final Query q = parse("GenericTextQueryMaxBooleanClausesWithPrefixQuery.xml");
+      final Query q = parse("BBGenericTextQueryMaxBooleanClausesWithPrefixQuery.xml");
       dumpResults("GenericTextQueryMaxBooleanClausesWithPrefixQuery", q, 5);
     } finally {
       BooleanQuery.setMaxClauseCount(maxClauseCount);
