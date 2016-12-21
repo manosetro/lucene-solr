@@ -167,20 +167,20 @@ public class TestBBCoreParser extends TestCoreParser {
   }
   
   public void testPhraseQueryXML() throws Exception {
-    Query q = parse("PhraseQuery.xml");
+    Query q = parse("BBPhraseQuery.xml");
     assertTrue("Expecting a PhraseQuery, but resulted in " + q.getClass(), q instanceof PhraseQuery);
     dumpResults("PhraseQuery", q, 5);
   }
   
   public void testPhraseQueryXMLWithStopwordsXML() throws Exception {
     if (analyzer() instanceof StandardAnalyzer) {
-      parseShouldFail("PhraseQueryStopwords.xml",
+      parseShouldFail("BBPhraseQueryStopwords.xml",
           "Empty phrase query generated for field:contents, phrase:and to a");
     }
   }
   
   public void testPhraseQueryXMLWithNoTextXML() throws Exception {
-    parseShouldFail("PhraseQueryEmpty.xml",
+    parseShouldFail("BBPhraseQueryEmpty.xml",
         "PhraseQuery has no text");
   }
 
@@ -267,7 +267,7 @@ public class TestBBCoreParser extends TestCoreParser {
   }
   
   public void testNearBooleanNear() throws IOException, ParserException {
-    final Query q = parse("NearBooleanNear.xml");
+    final Query q = parse("BBNearBooleanNear.xml");
     dumpResults("testNearBooleanNear", q, 5);
   }
   
@@ -286,7 +286,7 @@ public class TestBBCoreParser extends TestCoreParser {
   }
   
   public void testNearFirstBooleanMustXml() throws IOException, ParserException {
-    final Query q = parse("NearFirstBooleanMust.xml");
+    final Query q = parse("BBNearFirstBooleanMust.xml");
     dumpResults("testNearFirstBooleanMustXml", q, 50);
   }
   
